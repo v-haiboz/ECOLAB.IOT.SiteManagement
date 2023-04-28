@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Flurl.Http" Version="3.2.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ECOLAB.IOT.SiteManagement.Entity\ECOLAB.IOT.SiteManagement.Data.csproj" />
+    <ProjectReference Include="..\ECOLAB.IOT.SiteManagement.Provider\ECOLAB.IOT.SiteManagement.Provider.csproj" />
+    <ProjectReference Include="..\ECOLAB.IOT.SiteManagement.Repository\ECOLAB.IOT.SiteManagement.Repository.csproj" />
+  </ItemGroup>
+
+</Project>

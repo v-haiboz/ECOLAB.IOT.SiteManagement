@@ -1,0 +1,12 @@
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.deps.json
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.csproj.AssemblyReference.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.GeneratedMSBuildEditorConfig.editorconfig
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.AssemblyInfoInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.AssemblyInfo.cs
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.csproj.CoreCompileInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\refint\ECOLAB.IOT.SiteManagement.Provider.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Provider.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Debug\net6.0\ref\ECOLAB.IOT.SiteManagement.Provider.dll

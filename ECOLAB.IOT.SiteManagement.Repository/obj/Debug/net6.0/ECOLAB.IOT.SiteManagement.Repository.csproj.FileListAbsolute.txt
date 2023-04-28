@@ -1,0 +1,17 @@
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.deps.json
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Data.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Data.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.csproj.AssemblyReference.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.GeneratedMSBuildEditorConfig.editorconfig
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.AssemblyInfoInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.AssemblyInfo.cs
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.csproj.CoreCompileInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.csproj.CopyComplete
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\refint\ECOLAB.IOT.SiteManagement.Repository.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ECOLAB.IOT.SiteManagement.Repository.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\obj\Debug\net6.0\ref\ECOLAB.IOT.SiteManagement.Repository.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Common.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Repository\bin\Debug\net6.0\ECOLAB.IOT.SiteManagement.Common.pdb

@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32901.215
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement", "ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.csproj", "{20954C9D-46C5-4699-A2A2-A283E13FAAB5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Service", "ECOLAB.IOT.SiteManagement.Service\ECOLAB.IOT.SiteManagement.Service.csproj", "{0F9AABD6-7E4B-4EB9-B3D5-12004AA75D23}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Repository", "ECOLAB.IOT.SiteManagement.Repository\ECOLAB.IOT.SiteManagement.Repository.csproj", "{77A20CBC-A828-42C1-98FC-83EE916808C5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Provider", "ECOLAB.IOT.SiteManagement.Provider\ECOLAB.IOT.SiteManagement.Provider.csproj", "{030317FF-D3C1-49F2-B10C-FA4069642C71}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.DB", "ECOLAB.IOT.SiteManagement.DB\ECOLAB.IOT.SiteManagement.DB.csproj", "{F9B89A51-D232-435F-A5FF-038FC45B7764}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Data", "ECOLAB.IOT.SiteManagement.Entity\ECOLAB.IOT.SiteManagement.Data.csproj", "{798A50A6-C7C7-44A8-9B59-0C4528780805}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECOLAB.IOT.SiteManagement.Common", "ECOLAB.IOT.SiteManagement.Common\ECOLAB.IOT.SiteManagement.Common.csproj", "{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{20954C9D-46C5-4699-A2A2-A283E13FAAB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20954C9D-46C5-4699-A2A2-A283E13FAAB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20954C9D-46C5-4699-A2A2-A283E13FAAB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20954C9D-46C5-4699-A2A2-A283E13FAAB5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F9AABD6-7E4B-4EB9-B3D5-12004AA75D23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F9AABD6-7E4B-4EB9-B3D5-12004AA75D23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F9AABD6-7E4B-4EB9-B3D5-12004AA75D23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F9AABD6-7E4B-4EB9-B3D5-12004AA75D23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A20CBC-A828-42C1-98FC-83EE916808C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A20CBC-A828-42C1-98FC-83EE916808C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A20CBC-A828-42C1-98FC-83EE916808C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A20CBC-A828-42C1-98FC-83EE916808C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{030317FF-D3C1-49F2-B10C-FA4069642C71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{030317FF-D3C1-49F2-B10C-FA4069642C71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{030317FF-D3C1-49F2-B10C-FA4069642C71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{030317FF-D3C1-49F2-B10C-FA4069642C71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9B89A51-D232-435F-A5FF-038FC45B7764}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9B89A51-D232-435F-A5FF-038FC45B7764}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9B89A51-D232-435F-A5FF-038FC45B7764}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9B89A51-D232-435F-A5FF-038FC45B7764}.Release|Any CPU.Build.0 = Release|Any CPU
+		{798A50A6-C7C7-44A8-9B59-0C4528780805}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{798A50A6-C7C7-44A8-9B59-0C4528780805}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{798A50A6-C7C7-44A8-9B59-0C4528780805}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{798A50A6-C7C7-44A8-9B59-0C4528780805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0BD1BB8C-6913-4E99-9ADA-F1E8E50FB4BA}
+	EndGlobalSection
+EndGlobal

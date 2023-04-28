@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>ECOLAB.IOT.SiteManagement</name>
+    </assembly>
+    <members>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.Get(System.String)">
+            <summary>
+            查询site 用siteId
+            </summary>
+            <param name="siteId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.Post(ECOLAB.IOT.SiteManagement.Data.Dto.SiteRequestDto)">
+            <summary>
+            将初始化现场.(创建site,生成site下包含哪些设备(根据传进来的mesh.json,解析出来device id))
+            </summary>
+            <param name="siteRequestDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.Put(System.String,ECOLAB.IOT.SiteManagement.Data.Dto.SiteRequestDto)">
+            <summary>
+            更新现场.(根据传进来的site id 和对应的mesh.json,更新site下有哪些设备)
+            </summary>
+            <param name="siteId"></param>
+            <param name="siteRequestDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.Post(System.String,ECOLAB.IOT.SiteManagement.Data.Dto.GatewayRequestDto)">
+            <summary>
+            把gateway 挂到site下(for example:通过扫描二维码,来调用这个接口).
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayRequestDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.Put(System.String,ECOLAB.IOT.SiteManagement.Data.Dto.GatewayRequestUpdateDto)">
+            <summary>
+            更新gateway挂到site下(for example:通过扫描二维码,来调用这个接口).
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayRequestUpdateDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetGatewayBySiteId(System.String)">
+            <summary>
+            查询site下边有那些gateway
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayRequestUpdateDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.DeleteDeviceFromSite(System.String,System.String)">
+            <summary>
+            删除dateway的设备.
+            </summary>
+            <param name="siteId"></param>
+            <param name="DeviceNo"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDevicesBySiteNoOrMode(System.String,System.String)">
+            <summary>
+            查询site下有多少设备.
+            </summary>
+            <param name="siteId"></param>
+            <param name="mode"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.ConfigureDeviceToDGW(System.String,System.String,ECOLAB.IOT.SiteManagement.Data.Dto.DeviceToDGWRequestDto)">
+            <summary>
+            把设备添加到gateway下.
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayId"></param>
+            <param name="deviceToDGWRequestDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.UpdateDeviceToDGW(System.String,System.String,ECOLAB.IOT.SiteManagement.Data.Dto.DeviceToDGWRequestDto)">
+            <summary>
+            更新gateway下的设备.
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayId"></param>
+            <param name="deviceToDGWRequestDto"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDeviceStatus(System.String,System.String)">
+            <summary>
+            查询单台设备状态
+            </summary>
+            <param name="siteId"></param>
+            <param name="deviceId"></param>
+            <returns></returns>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDeviceStatusListBySiteId(System.String)">
+            <summary>
+            查询Site下设备状态
+            </summary>
+            <param name="siteId"></param>
+            <param name="deviceId"></param>
+            <returns></returns>
+        </member>
+        <member name="T:ECOLAB.IOT.SiteManagement.Quartz.JobSchedule">
+            <summary>
+            Job调度中间对象
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Quartz.JobSchedule.JobType">
+            <summary>
+            Job类型
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Quartz.JobSchedule.CronExpression">
+            <summary>
+            Cron表达式
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Quartz.JobSchedule.JobStatu">
+            <summary>
+            Job状态
+            </summary>
+        </member>
+        <member name="T:ECOLAB.IOT.SiteManagement.Quartz.JobStatus">
+            <summary>
+            Job运行状态
+            </summary>
+        </member>
+    </members>
+</doc>
