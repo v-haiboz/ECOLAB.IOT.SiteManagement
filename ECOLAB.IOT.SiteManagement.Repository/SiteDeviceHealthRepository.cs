@@ -98,28 +98,32 @@
 
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo,string gatewayNo)
         {
+            var exist = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
+            {
+                string query = $@"SELECT Id
+                                  FROM [dbo].[Site]
+                                  where SiteNo='{siteNo}'";
+                var rows = conn.Query(query);
+                if (rows == null || rows.Count() <= 0)
+                {
+                    return false;
+                }
+                return true;
+            });
+
+            if (!exist)
+            {
+                throw new Exception($"siteNo:{siteNo} doesn't exist.");
+            }
+
             string query = $@"SELECT Model ,d.DeviceNo
                          FROM [dbo].[Site] as a
                               Inner join  [dbo].[SiteRegistry] as c
                               on c.SiteId=a.Id
 							  inner join [dbo].[SiteDevice] as d
 							  on a.Id=d.SiteId
-                              where a.SiteNo = '{siteNo}'
+                              where a.SiteNo = '{siteNo}' and not exists(select 1 from [dbo].[GatewayDevice] b where b.DeviceNo=d.DeviceNo)
                               order by Model";
-            if (!string.IsNullOrEmpty(gatewayNo))
-            {
-                query = $@"SELECT Model ,a.DeviceNo
-                              FROM [dbo].[GatewayDevice] as a
-                              Inner join  [dbo].[Site] as b
-                              on a.SiteId=b.Id
-                              Inner join  [dbo].[SiteRegistry] as c
-                              on c.SiteId=b.Id
-                              inner join [dbo].[SiteGateway] as d
-							  on a.GatewayId=d.Id
-                             where b.SiteNo = '{siteNo}'  and d.GatewayNo='{gatewayNo}'
-                              order by Model";
-            }
-            
 
             return Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
             {

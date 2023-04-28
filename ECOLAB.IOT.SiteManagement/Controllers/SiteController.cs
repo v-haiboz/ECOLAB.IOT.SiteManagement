@@ -275,13 +275,13 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <returns></returns>
         [Tags("Device")]
         [HttpGet("{siteId}/deviceList")]
-        public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId, [FromQuery] string? gatewayId="")
+        public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId)
         {
             try
             {
                 if (!string.IsNullOrEmpty(siteId))
                 {
-                    var list = await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId, gatewayId);
+                    var list = await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId,"");
                     return list.ToString();
                 }
 

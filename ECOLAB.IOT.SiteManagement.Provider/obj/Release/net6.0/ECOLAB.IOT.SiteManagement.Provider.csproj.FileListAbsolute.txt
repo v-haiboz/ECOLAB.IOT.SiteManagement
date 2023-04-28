@@ -10,3 +10,8 @@ C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Rele
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Release\net6.0\refint\ECOLAB.IOT.SiteManagement.Provider.dll
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Provider.pdb
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Release\net6.0\ref\ECOLAB.IOT.SiteManagement.Provider.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Common.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Common.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Provider\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Provider.csproj.CopyComplete

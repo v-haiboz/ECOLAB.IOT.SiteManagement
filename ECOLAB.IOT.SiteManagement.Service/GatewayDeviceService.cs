@@ -91,56 +91,45 @@
             return await Task.FromResult(bl);
         }
 
-        public async Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayNo= null, int pageIndex = 1, int pageSize = 50)
+        public async Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayNo= null, int pageIndex = 1, int pageSize = 1000)
         {
             var deviceModes = _siteDeviceHealthRepository.GetDeviceListFromInternalDb(siteNo, gatewayNo);
 
-            var healths = _siteDeviceHealthRepository.GetDeviceListStatusFromExternalDb(deviceModes);
+           // var healths = _siteDeviceHealthRepository.GetDeviceListStatusFromExternalDb(deviceModes);
             var jobject = new JObject();
-            var modes = deviceModes.Select(item => item.Model).Distinct();
+            var models = deviceModes.Select(item => item.Model).Distinct();
             jobject.Add("id", siteNo);
-            if (modes == null || modes.Count() == 0)
+            if (models == null || models.Count() == 0)
             {
                 return jobject;
             }
 
 
-            foreach (var mode in modes)
+            foreach (var mode in models)
             {
-                var data = healths.Where(item => item.Mode == mode).ToList();
+                var data = deviceModes.Where(item => item.Model == mode).ToList();
                 List<dynamic> subList = new List<dynamic>();
                 foreach (var item in data)
                 {
                     subList.Add(new
                     {
-                        id = item.DeviceId,
-                        connection_state = item.Status,
-                        last_seen = item.Last_seen
+                        id = item.DeviceNo,
+                        siteId= siteNo
+                        //connection_state = item.Status,
+                        //last_seen = item.Last_seen
                     });
                 }
                 var total = data.Count;
-                var onlineCount = data.Where(item => item.Status == "online").Count();
+               // var onlineCount = data.Where(item => item.Status == "online").Count();
                 var jtoken = new JObject();
                 jtoken.Add("total", total);
-                jtoken.Add("online", onlineCount);
+                //jtoken.Add("online", onlineCount);
                 jtoken.Add("data", JArray.Parse(JsonConvert.SerializeObject(subList)));
 
                 jobject.Add(mode, jtoken);
             }
 
             return await Task.FromResult(jobject);
-
-            //var list= _gatewayDeviceRepository.QueryDeviceListBySiteNo(siteNo, gatewayNo, pageIndex,pageSize);
-
-            //var result = new List<SiteMappingDeviceDto>();
-
-            //foreach (var item in list)
-            //{
-            //    result.Add(item.CovertToSiteMappingDeviceDto());
-            //}
-
-
-            //return await Task.FromResult(result);
         }
     }
 }
