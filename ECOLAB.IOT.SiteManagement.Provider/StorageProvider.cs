@@ -4,6 +4,8 @@
     using Azure.Storage.Blobs;
     using Azure.Storage.Blobs.Models;
     using Azure.Storage.Sas;
+    using Flurl.Http;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
     using System.Text;
@@ -19,10 +21,22 @@
         public Task<string> CopyToTargetContainer(string connectionString, string blobContainerName, string Url,string blobContainerName_Target,string targetRelativePath);
 
         public Task<string> UploadJsonToBlob(string connectionString, string blobContainerName,string fileName, string json);
+
+        public Task<string> GetAllowListSASUrl(string url);
     }
 
     public class StorageProvider : IStorageProvider
     {
+        private readonly IConfiguration _config;
+        private string SASUrl;
+        private string StorageAPICertificate;
+        public StorageProvider(IConfiguration config)
+        {
+            _config = config;
+            SASUrl = _config["StorageAPI.SASUrl"];
+            StorageAPICertificate = _config["StorageAPI.StorageAPICertificate"];
+        }
+
         public async Task<string> CopyToTargetContainer(string connectionString, string blobContainerName, string Url, string blobContainerName_Target,string targetRelativePath)
         {
             try
@@ -114,5 +128,88 @@
 
             return md5;
         }
+
+      
+        public async Task<string> GetAllowListSASUrl(string url)
+        {
+            try
+            {
+                var list = new List<SASUrl>();
+                list.Add(new SASUrl() { noneKeyUrl = url });
+
+                var result = await SASUrl.WithHeader("Storage-API-Certificate", StorageAPICertificate).PostJsonAsync(list).ReceiveJson<Root>();
+
+                if (result.status == 200 && result.data != null && result.data.Count > 0)
+                {
+                    return result.data[0].fileSASUrl;
+                }
+
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return "";
+            }
+
+        }
+    }
+
+    public class SASUrl
+    {
+        public string noneKeyUrl { get; set; }
+    }
+    public class DataItem
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public string fileSASUrl { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string fileFullPath { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string containerName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string storageAccountName { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public int uploadUtcTime { get; set; }
+    }
+
+    public class Root
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        public int status { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public string errors { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public float timestamp { get; set; }
+        /// <summary>
+        /// 
+        /// </summary>
+        public List<DataItem> data { get; set; }
+    }
+
+    public class TokenInfoDto
+    {
+        public string? TokenType { get; set; }
+        public int Expires_In { get; set; }
+
+        public int Ext_Expires_In { get; set; }
+
+        public string? Access_Token { get; set; }
+
     }
 }

@@ -120,8 +120,8 @@
             foreach (var registry in registryRequestDtos)
             {
                 var siteDevices = new List<SiteDevice>();
-                var connectionString = _config["BlobOfRegistry:connectionString"]; 
-                var blobContainerName = _config["BlobOfRegistry:blobContainerName"]; 
+                var connectionString = _config["BlobOfRegistry:ConnectionString"]; 
+                var blobContainerName = _config["BlobOfRegistry:BlobContainerName"]; 
 
                 var md5 =await _storageProvider.GetBlobMD5(connectionString, blobContainerName, registry.Url);
 
@@ -130,7 +130,7 @@
                     throw new Exception($"{registry.Url} Invalid Checksum");
                 }
                 
-                var blobContainerNameTarget = _config["BlobOfRegistry:blobContainerNameTarget"];
+                var blobContainerNameTarget = _config["BlobOfRegistry:BlobContainerNameTarget"];
                 var content_json= await _storageProvider.DownloadToText(connectionString, blobContainerName, registry.Url);
                 var targetRelativePath = @$"deviceConfigFile/{registry.Model}/{siteNo}";
                 var target_url = await _storageProvider.CopyToTargetContainer(connectionString, blobContainerName, registry.Url, blobContainerNameTarget, targetRelativePath);

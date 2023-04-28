@@ -156,7 +156,11 @@
         "frameworks": {
           "net6.0": {
             "targetAlias": "net6.0",
-            "projectReferences": {}
+            "projectReferences": {
+              "C:\\EcoCode\\ECOLAB.IOT.SiteManagement\\ECOLAB.IOT.SiteManagement.Entity\\ECOLAB.IOT.SiteManagement.Data.csproj": {
+                "projectPath": "C:\\EcoCode\\ECOLAB.IOT.SiteManagement\\ECOLAB.IOT.SiteManagement.Entity\\ECOLAB.IOT.SiteManagement.Data.csproj"
+              }
+            }
           }
         },
         "warningProperties": {
@@ -172,6 +176,14 @@
             "Azure.Storage.Blobs": {
               "target": "Package",
               "version": "[12.16.0, )"
+            },
+            "Flurl.Http": {
+              "target": "Package",
+              "version": "[3.2.4, )"
+            },
+            "Microsoft.Extensions.Configuration.Abstractions": {
+              "target": "Package",
+              "version": "[7.0.0, )"
             },
             "WindowsAzure.Storage": {
               "target": "Package",

@@ -1966,6 +1966,9 @@
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
           "Azure.Storage.Blobs": "12.16.0",
+          "ECOLAB.IOT.SiteManagement.Data": "1.0.0",
+          "Flurl.Http": "3.2.4",
+          "Microsoft.Extensions.Configuration.Abstractions": "7.0.0",
           "WindowsAzure.Storage": "9.3.3"
         },
         "compile": {

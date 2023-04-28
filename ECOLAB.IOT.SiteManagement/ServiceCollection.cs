@@ -5,6 +5,7 @@ using ECOLAB.IOT.SiteManagement.Service;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Spi;
+using static ECOLAB.IOT.SiteManagement.Provider.IDistributeJobProvider;
 
 namespace ECOLAB.IOT.SiteManagement
 {
@@ -47,7 +48,7 @@ namespace ECOLAB.IOT.SiteManagement
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             services.AddSingleton<DistributeJob>();
             services.AddSingleton(
-                 new JobSchedule(jobType: typeof(DistributeJob), cronExpression: "0/30 * * * * ?")
+                 new JobSchedule(jobType: typeof(DistributeJob), cronExpression: "01 */2 * * * ?")
            );
             services.AddSingleton<QuartzHostedService>();
             return services;
@@ -59,6 +60,8 @@ namespace ECOLAB.IOT.SiteManagement
                 return null;
 
             services.AddScoped<IStorageProvider, StorageProvider>();
+            services.AddScoped<IDistributeJobProvider, DistributeJobProvider>();
+            services.AddScoped<ITokenProvider, TokenProvider>();
             return services;
         }
     }

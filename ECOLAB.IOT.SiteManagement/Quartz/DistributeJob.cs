@@ -21,7 +21,7 @@ namespace ECOLAB.IOT.SiteManagement.Quartz
                 var service = scope.ServiceProvider.GetService<IDistributeJobService>();
                 if (service!=null)
                 {
-                    _ = await service.Travle();
+                    _ = await service.Travel();
                 }
             }
 

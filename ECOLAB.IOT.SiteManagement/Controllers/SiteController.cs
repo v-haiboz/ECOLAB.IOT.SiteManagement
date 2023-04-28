@@ -152,7 +152,6 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
             {
                 var result = new JsonResult(ex.Message);
                 result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
                 return result;
             }
 

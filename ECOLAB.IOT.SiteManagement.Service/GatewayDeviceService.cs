@@ -27,8 +27,6 @@
         private readonly IStorageProvider _storageProvider;
         private readonly IConfiguration _config;
         private readonly ISiteDeviceHealthRepository _siteDeviceHealthRepository;
-        //private static string connectionString = "DefaultEndpointsProtocol=https;AccountName=cninsedmiotblob001d;AccountKey=AiTTPH3tiLYh09CeQJCRZreTiQXz5KnLT0LVkeR6/WUqEnrWjzhEHJsT/lgwNtctun/dvy9FD2faaJHQXUrgEg==;EndpointSuffix=core.chinacloudapi.cn";
-        //private static string blobContainerName = "ecolink-site-management";
 
         public GatewayDeviceService(IGatewayDeviceRepository gatewayDeviceRepository, ISiteService siteService, IStorageProvider storageProvider,IConfiguration config, ISiteDeviceHealthRepository siteDeviceHealthRepository)
         {
@@ -48,8 +46,8 @@
                 throw new Exception("Some device numbers do not exist");
             }
 
-            var connectionString = _config["BlobOfAllowList:connectionString"]; 
-            var blobContainerName = _config["BlobOfAllowList:blobContainerName"];
+            var connectionString = _config["BlobOfAllowList:ConnectionString"]; 
+            var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
             var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName,$"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json",Utilities.GetAllowListJson(siteDevices));
 
 
@@ -72,8 +70,8 @@
                 throw new Exception("Some device numbers do not exist");
             }
 
-            var connectionString = _config["BlobOfAllowList:connectionString"];
-            var blobContainerName = _config["BlobOfAllowList:blobContainerName"];
+            var connectionString = _config["BlobOfAllowList:ConnectionString"];
+            var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
             var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDevices));
 
 

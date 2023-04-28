@@ -94,7 +94,7 @@
         </member>
         <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDeviceStatusListBySiteId(System.String)">
             <summary>
-            查询单台设备状态
+            查询Site下设备状态
             </summary>
             <param name="siteId"></param>
             <param name="deviceId"></param>
