@@ -70,7 +70,7 @@
             return siteDeviceMesh;
         }
 
-        public static string GetAllowListJson(List<SiteDeviceDto> siteDeviceDtos)
+        public static string GetAllowListJson(List<SiteDeviceDto> siteDeviceDtos,string siteNo)
         {
             var jobject = new JObject();
             var deviceAllowList = new JArray();
@@ -79,6 +79,7 @@
                 deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList)); 
             }
 
+            jobject.Add("siteId", siteNo);
             jobject.Add("nodes", deviceAllowList);
             var settings = new JsonSerializerSettings();
 

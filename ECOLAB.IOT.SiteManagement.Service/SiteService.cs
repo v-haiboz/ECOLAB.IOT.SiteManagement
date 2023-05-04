@@ -42,7 +42,7 @@
             var siteEntity = await CovertToSite(siteRequestDto);
             var bl = _siteRepository.Insert(siteEntity);
            
-            if (bl && siteEntity.SiteRegistries != null)
+            if (bl)
             {
                 var siteResponseDto = new SiteResponseDto()
                 {
@@ -50,13 +50,16 @@
                     Registry = new List<RegistryResponseDto>()
                 };
 
-                siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
+                if (siteEntity.SiteRegistries != null)
                 {
-                    Checksum = item.Checksum,
-                    Model = item.Model,
-                    Url = item.TargetUrl,
-                    Version = item.Version
-                }));
+                    siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
+                    {
+                        Checksum = item.Checksum,
+                        Model = item.Model,
+                        Url = item.TargetUrl,
+                        Version = item.Version
+                    }));
+                }
 
                 return await Task.FromResult(siteResponseDto);
             }
@@ -69,22 +72,24 @@
             var siteEntity = await CovertToSite(siteRequestDto);
             var bl = _siteRepository.Update(siteNo,siteEntity);
 
-            if (bl && siteEntity.SiteRegistries != null)
+            if (bl)
             {
                 var siteResponseDto = new SiteResponseDto()
                 {
-                    Id = siteEntity.SiteNo,
+                    Id = siteNo,
                     Registry = new List<RegistryResponseDto>()
                 };
 
-                siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
+                if (siteEntity.SiteRegistries != null)
                 {
-                    Checksum = item.Checksum,
-                    Model = item.Model,
-                    Url = item.TargetUrl,
-                    Version = item.Version
-                }));
-
+                    siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
+                    {
+                        Checksum = item.Checksum,
+                        Model = item.Model,
+                        Url = item.TargetUrl,
+                        Version = item.Version
+                    }));
+                }
                 return await Task.FromResult(siteResponseDto);
             }
 

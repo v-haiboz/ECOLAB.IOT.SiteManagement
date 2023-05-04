@@ -20,7 +20,7 @@ namespace ECOLAB.IOT.SiteManagement.Provider
             {
                 _storageProvider = storageProvider;
                 _config = config;
-                _distributeUrl = _config["Distribute.Url"];
+                _distributeUrl = _config["Distribute:Url"];
             }
 
             public async Task<KeyValuePair<bool, string>> DistributeTask(GatewayAllowListTask gatewayAllowListTask, string groupName, string token)

@@ -69,3 +69,5 @@ C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\bin\Release\net6.
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\bin\Release\net6.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\bin\Release\net6.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\bin\Release\net6.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Properties.Resources.resources
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.csproj.GenerateResource.cache

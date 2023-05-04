@@ -16,10 +16,6 @@ namespace ECOLAB.IOT.SiteManagement
         {
             if (services == null)
                 return null;
-            //services.AddQuartzUI();
-            // var optionsBuilder = new DbContextOptionsBuilder<QuarzEFContext>();
-            //optionsBuilder.UseDm("Server=tcp:cn-ins-elinkcicd-sqlserver-001-d.database.chinacloudapi.cn,1433;Initial Catalog=CN-INS-ELINKCICD-SQLDB-001-D;Persist Security Info=False;User ID=ELINKCICDSQLAdmin;Password=XD#$s29os21P", b => b.MaxBatchSize(1));
-
 
             services.AddScoped<ISiteService, SiteService>();
             services.AddScoped<IGetwayService, GetwayService>();

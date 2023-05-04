@@ -118,27 +118,29 @@
                     siteSb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
 
                     var siteId = conn.ExecuteScalar(siteSb.ToString(), site, transaction: transaction);
-
-                    foreach (var registry in site.SiteRegistries)
+                    if (site.SiteRegistries != null)
                     {
-                        var siteRegistrySb = new StringBuilder();
-                        siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,Version,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.Version}','{registry.CreatedAt}');");
-                        siteRegistrySb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
-
-                        var siteRegistryId = conn.ExecuteScalar(siteRegistrySb.ToString(), registry, transaction: transaction);
-
-                        if (registry.SiteDevices != null)
+                        foreach (var registry in site.SiteRegistries)
                         {
-                            var siteDeviceSb = new StringBuilder();
-                            siteDeviceSb.Append("INSERT INTO [SiteDevice] (SiteId, SiteRegistryId,DeviceNo,JObjectInAllowList,CreatedAt) VALUES ");
-                            foreach (var device in registry.SiteDevices)
-                            {
-                                siteDeviceSb.AppendFormat("('{0}','{1}','{2}','{3}','{4}'),", siteId, siteRegistryId, device.DeviceNo, device.JObjectInAllowList, device.CreatedAt);
-                            }
+                            var siteRegistrySb = new StringBuilder();
+                            siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,Version,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.Version}','{registry.CreatedAt}');");
+                            siteRegistrySb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
 
-                            var inserSql = siteDeviceSb.ToString();
-                            var sql = inserSql.Substring(0, inserSql.LastIndexOf(','));
-                            conn.Execute(sql.ToString(), transaction: transaction);
+                            var siteRegistryId = conn.ExecuteScalar(siteRegistrySb.ToString(), registry, transaction: transaction);
+
+                            if (registry.SiteDevices != null)
+                            {
+                                var siteDeviceSb = new StringBuilder();
+                                siteDeviceSb.Append("INSERT INTO [SiteDevice] (SiteId, SiteRegistryId,DeviceNo,JObjectInAllowList,CreatedAt) VALUES ");
+                                foreach (var device in registry.SiteDevices)
+                                {
+                                    siteDeviceSb.AppendFormat("('{0}','{1}','{2}','{3}','{4}'),", siteId, siteRegistryId, device.DeviceNo, device.JObjectInAllowList, device.CreatedAt);
+                                }
+
+                                var inserSql = siteDeviceSb.ToString();
+                                var sql = inserSql.Substring(0, inserSql.LastIndexOf(','));
+                                conn.Execute(sql.ToString(), transaction: transaction);
+                            }
                         }
                     }
                     transaction.Commit();
@@ -163,6 +165,10 @@
             {
                 string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
                 var Id = conn.ExecuteScalar(query);
+                if (Id == null)
+                {
+                    return -1;
+                }
                 return (Int64)Id;
             });
 
@@ -170,6 +176,33 @@
             {
                 throw new Exception("SiteId doesn't exist, pls double check.");
             }
+
+            if (site.SiteRegistries != null)
+            {
+                foreach (var registry in site.SiteRegistries)
+                {
+                    if (registry.SiteDevices != null)
+                    {
+                        var devices = registry.SiteDevices.Select(item => item.DeviceNo);
+                        var exist = Execute<List<string>>((conn) =>
+                        {
+                            var deviceNos = string.Join("','", devices);
+                            string query = $@"SELECT distinct b.SiteNo  FROM [dbo].[SiteDevice] as a
+                                             inner join [dbo].[Site] as b
+	                                         on a.SiteId=b.Id where a.DeviceNo in ('{deviceNos}') and b.siteNo!='{siteNo}'";
+                            var siteNos = conn.Query<string>(query);
+                            return siteNos.ToList();
+
+                        });
+
+                        if (exist != null && exist.Count > 0)
+                        {
+                            throw new Exception($"The devices of registry Mode {registry.Model} also exist in other gateways:{string.Join("','", exist)}.");
+                        }
+                    }
+                }
+            }
+        
 
             return Execute((conn, transaction) =>
             {
@@ -179,26 +212,29 @@
                     var deleteSql = $"delete from SiteRegistry where SiteId={siteId};delete from SiteDevice where SiteId={siteId}";
                     conn.Execute(deleteSql,transaction: transaction);
 
-                    foreach (var registry in site.SiteRegistries)
+                    if (site.SiteRegistries != null)
                     {
-                        var siteRegistrySb = new StringBuilder();
-                        siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,Version,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.Version}','{registry.CreatedAt}');");
-                        siteRegistrySb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
-
-                        var siteRegistryId = conn.ExecuteScalar(siteRegistrySb.ToString(), registry, transaction: transaction);
-
-                        if (registry.SiteDevices != null)
+                        foreach (var registry in site.SiteRegistries)
                         {
-                            var siteDeviceSb = new StringBuilder();
-                            siteDeviceSb.Append("INSERT INTO [SiteDevice] (SiteId, SiteRegistryId,DeviceNo,JObject,CreatedAt) VALUES ");
-                            foreach (var device in registry.SiteDevices)
-                            {
-                                siteDeviceSb.AppendFormat("('{0}','{1}','{2}','{3}','{4}'),", siteId, siteRegistryId, device.DeviceNo, device.JObjectInAllowList, device.CreatedAt);
-                            }
+                            var siteRegistrySb = new StringBuilder();
+                            siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,Version,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.Version}','{registry.CreatedAt}');");
+                            siteRegistrySb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
 
-                            var inserSql = siteDeviceSb.ToString();
-                            var sql = inserSql.Substring(0, inserSql.LastIndexOf(','));
-                            conn.Execute(sql.ToString(), transaction: transaction);
+                            var siteRegistryId = conn.ExecuteScalar(siteRegistrySb.ToString(), registry, transaction: transaction);
+
+                            if (registry.SiteDevices != null)
+                            {
+                                var siteDeviceSb = new StringBuilder();
+                                siteDeviceSb.Append("INSERT INTO [SiteDevice] (SiteId, SiteRegistryId,DeviceNo,JObjectInAllowList,CreatedAt) VALUES ");
+                                foreach (var device in registry.SiteDevices)
+                                {
+                                    siteDeviceSb.AppendFormat("('{0}','{1}','{2}','{3}','{4}'),", siteId, siteRegistryId, device.DeviceNo, device.JObjectInAllowList, device.CreatedAt);
+                                }
+
+                                var inserSql = siteDeviceSb.ToString();
+                                var sql = inserSql.Substring(0, inserSql.LastIndexOf(','));
+                                conn.Execute(sql.ToString(), transaction: transaction);
+                            }
                         }
                     }
                     transaction.Commit();

@@ -100,7 +100,7 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         {
             try
             {
-                if (siteRequestDto.Validate())
+                if (siteRequestDto.Validate(false))
                 {
                     return await _siteService.Update(siteId, siteRequestDto);
                 }
@@ -236,15 +236,15 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [Tags("Device")]
         [HttpDelete]
         [Route("{siteId}/gateway/{deviceNo}")]
-        public async Task<dynamic> DeleteDeviceFromSite([Required] string siteId, [Required]  string DeviceNo)
+        public async Task<dynamic> DeleteDeviceFromSite([Required] string siteId, [Required]  string deviceNo)
         {
             try
             {
                 var result = new JsonResult("Delete successful.");
                 result.StatusCode = (int)HttpStatusCode.OK;
-                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(DeviceNo))
+                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceNo))
                 {
-                    var bl= await _gatewayDeviceService.Delete(siteId, DeviceNo);
+                    var bl= await _gatewayDeviceService.Delete(siteId, deviceNo);
                     if (!bl)
                     {
                         result = new JsonResult("Delete failed.");

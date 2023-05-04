@@ -33,8 +33,8 @@
         public StorageProvider(IConfiguration config)
         {
             _config = config;
-            SASUrl = _config["StorageAPI.SASUrl"];
-            StorageAPICertificate = _config["StorageAPI.StorageAPICertificate"];
+            SASUrl = _config["StorageAPI:SASUrl"];
+            StorageAPICertificate = _config["StorageAPI:StorageAPICertificate"];
         }
 
         public async Task<string> CopyToTargetContainer(string connectionString, string blobContainerName, string Url, string blobContainerName_Target,string targetRelativePath)
