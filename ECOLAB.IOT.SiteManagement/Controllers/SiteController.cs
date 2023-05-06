@@ -275,13 +275,13 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <returns></returns>
         [Tags("Device")]
         [HttpGet("{siteId}/deviceList")]
-        public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId)
+        public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId, [FromQuery] string? gatewayId = "")
         {
             try
             {
                 if (!string.IsNullOrEmpty(siteId))
                 {
-                    var list = await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId,"");
+                    var list = await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId, gatewayId);
                     return list.ToString();
                 }
 
@@ -363,7 +363,7 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
                         result.StatusCode = (int)HttpStatusCode.InternalServerError;
                     }
 
-                    return url;
+                    return result;
                 }
 
                 result = new JsonResult("Request paramter Invalidate.");

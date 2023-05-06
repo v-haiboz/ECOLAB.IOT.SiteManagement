@@ -1,5 +1,8 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Service
 {
+    using Azure.Storage.Blobs;
+    using ECOLAB.IOT.SiteManagement.Common;
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using ECOLAB.IOT.SiteManagement.Provider;
@@ -18,18 +21,22 @@
 
         public Task<SiteResponseDto> GetRegistryBySiteNo(string siteNo);
         public Task<List<SiteDeviceDto>> GeAllowListOfSiteDeviceBySiteNoAndDeviceNos(string siteNo,List<string> deviceNos);
+
+        public Task<List<SiteDeviceDetailInfoDto>> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo,string gatewayNo, List<string> deviceNos);
     }
 
     public class SiteService : ISiteService
     {
         private readonly IStorageProvider _storageProvider;
         private readonly ISiteRepository _siteRepository;
+        private readonly ISiteRegistryRepository _siteRegistryRepository;
         private readonly IConfiguration _config;
-        public SiteService(IStorageProvider storageProvider, ISiteRepository siteRepository,IConfiguration config)
+        public SiteService(IStorageProvider storageProvider, ISiteRepository siteRepository,IConfiguration config, ISiteRegistryRepository siteRegistryRepository)
         {
             _storageProvider = storageProvider;
             _siteRepository = siteRepository;
             _config = config;
+            _siteRegistryRepository = siteRegistryRepository;
         }
 
         public Task<SiteResponseDto> GetBySiteNo(string siteNo)
@@ -41,8 +48,8 @@
         {
             var siteEntity = await CovertToSite(siteRequestDto);
             var bl = _siteRepository.Insert(siteEntity);
-           
-            if (bl)
+
+            if (bl && siteEntity.SiteRegistries != null)
             {
                 var siteResponseDto = new SiteResponseDto()
                 {
@@ -50,16 +57,13 @@
                     Registry = new List<RegistryResponseDto>()
                 };
 
-                if (siteEntity.SiteRegistries != null)
+                siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
                 {
-                    siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
-                    {
-                        Checksum = item.Checksum,
-                        Model = item.Model,
-                        Url = item.TargetUrl,
-                        Version = item.Version
-                    }));
-                }
+                    Checksum = item.Checksum,
+                    Model = item.Model,
+                    Url = item.TargetUrl,
+                    Version = item.Version
+                }));
 
                 return await Task.FromResult(siteResponseDto);
             }
@@ -72,7 +76,7 @@
             var siteEntity = await CovertToSite(siteRequestDto);
             var bl = _siteRepository.Update(siteNo,siteEntity);
 
-            if (bl)
+            if (bl && siteEntity.SiteRegistries != null)
             {
                 var siteResponseDto = new SiteResponseDto()
                 {
@@ -80,21 +84,20 @@
                     Registry = new List<RegistryResponseDto>()
                 };
 
-                if (siteEntity.SiteRegistries != null)
+                siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
                 {
-                    siteEntity.SiteRegistries.ForEach(item => siteResponseDto.Registry.Add(new RegistryResponseDto()
-                    {
-                        Checksum = item.Checksum,
-                        Model = item.Model,
-                        Url = item.TargetUrl,
-                        Version = item.Version
-                    }));
-                }
+                    Checksum = item.Checksum,
+                    Model = item.Model,
+                    Url = item.TargetUrl,
+                    Version = item.Version
+                }));
+
                 return await Task.FromResult(siteResponseDto);
             }
 
             return null;
         }
+
 
         private async Task<Site> CovertToSite(SiteRequestDto siteRequestDto)
         {
@@ -122,13 +125,16 @@
             }
 
             var list = new List<SiteRegistry>();
+            var version = Utility.GenerateVersion();
             foreach (var registry in registryRequestDtos)
             {
                 var siteDevices = new List<SiteDevice>();
                 var connectionString = _config["BlobOfRegistry:ConnectionString"]; 
-                var blobContainerName = _config["BlobOfRegistry:BlobContainerName"]; 
-
-                var md5 =await _storageProvider.GetBlobMD5(connectionString, blobContainerName, registry.Url);
+                Uri uri = new Uri(registry.Url);
+                BlobClient blobClient = new BlobClient(uri);
+                var blobContainerName = blobClient.BlobContainerName;
+                var blobName = blobClient.Name;
+                var md5 =await _storageProvider.GetBlobMD5(connectionString, blobContainerName, blobName);
 
                 if (md5 != registry.Checksum)
                 {
@@ -136,11 +142,11 @@
                 }
                 
                 var blobContainerNameTarget = _config["BlobOfRegistry:BlobContainerNameTarget"];
-                var content_json= await _storageProvider.DownloadToText(connectionString, blobContainerName, registry.Url);
+                var content_json= await _storageProvider.DownloadToText(connectionString, blobContainerName, blobName);
                 var targetRelativePath = @$"deviceConfigFile/{registry.Model}/{siteNo}";
-                var target_url = await _storageProvider.CopyToTargetContainer(connectionString, blobContainerName, registry.Url, blobContainerNameTarget, targetRelativePath);
+                var target_url = await _storageProvider.CopyToTargetContainer(connectionString, blobContainerName, blobName, blobContainerNameTarget, targetRelativePath);
 
-                var deviceInfo = await ConverToSiteDevicesFromJson(content_json);
+                var deviceInfo = await ConverToSiteDevicesFromJson(content_json, registry.Model);
                 if (deviceInfo.DeviceTransformerDtos != null)
                 {
                     deviceInfo.DeviceTransformerDtos.ForEach(item => { siteDevices.Add(new SiteDevice() { DeviceNo = item.DeviceNo, JObjectInAllowList=item.JOjectInAllowList }); });
@@ -153,16 +159,24 @@
                     TargetUrl = target_url,
                     Checksum = registry.Checksum,
                     SiteDevices = siteDevices,
-                    Version = deviceInfo.Version
+                    Version= version
                 }); ;
             }
 
             return list;
         }
 
-        private async Task<SiteDeviceMeshTransformerDto> ConverToSiteDevicesFromJson(string content_json)
+     
+
+        private async Task<SiteDeviceTransformerDto> ConverToSiteDevicesFromJson(string content_json, string mode = "vcc")
         {
-            var siteDeviceMesh = Utilities.GetSiteDeviceTransformers(content_json);
+            if (mode.ToLower() == ModelEnum.VRC.ToString().ToLower())
+            {
+                var siteDeviceLora = Utilities.GetSiteDeviceFromLoraJson(content_json);
+                return siteDeviceLora;
+            }
+
+            var siteDeviceMesh = Utilities.GetSiteDeviceFromMeshJson(content_json);
             return siteDeviceMesh;
         }
 
@@ -190,7 +204,7 @@
                 Checksum = item.Checksum,
                 Model = item.Model,
                 Url = item.TargetUrl,
-                Version = item.Version
+                Version =   item.Version
             }));
 
             return await Task.FromResult(siteResponseDto);
@@ -201,6 +215,20 @@
             var list = _siteRepository.GeAllowListOfSiteDeviceBySiteNoAndDeviceNos(siteNo, deviceNos);
 
             var result =new List<SiteDeviceDto>();
+
+            foreach (var item in list)
+            {
+                result.Add(item.CovertToSiteDeviceDto());
+            }
+
+            return await Task.FromResult(result);
+        }
+
+        public async Task<List<SiteDeviceDetailInfoDto>> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo, string gatewayNo, List<string> deviceNos)
+        {
+            var list = _siteRepository.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceNos);
+
+            var result = new List<SiteDeviceDetailInfoDto>();
 
             foreach (var item in list)
             {

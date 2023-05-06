@@ -7,5 +7,7 @@ namespace ECOLAB.IOT.SiteManagement.Data.Entity
 
         public string DeviceNo { get; set; }
 
+        public bool IsConfig { get; set; }
+
     }
 }

@@ -72,7 +72,7 @@
 
             foreach (var mode in modes)
             {
-                var data = healths.Where(item => item.Mode == mode).ToList();
+                var data = healths?.Where(item => item.Mode == mode).ToList();
                 List<dynamic> list = new List<dynamic>();
                 foreach (var item in data)
                 {

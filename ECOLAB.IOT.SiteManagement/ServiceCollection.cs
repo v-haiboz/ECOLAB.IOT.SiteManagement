@@ -35,6 +35,7 @@ namespace ECOLAB.IOT.SiteManagement
             services.AddScoped<IGatewayDeviceRepository, GatewayDeviceRepository>();
             services.AddScoped<ISiteDeviceHealthRepository, SiteDeviceHealthRepository>();
             services.AddScoped<IGatewayAllowListTaskRepository, GatewayAllowListTaskRepository>();
+            services.AddScoped<ISiteRegistryRepository, SiteRegistryRepository>();
             return services;
         }
 

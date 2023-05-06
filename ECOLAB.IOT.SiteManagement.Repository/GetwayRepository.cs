@@ -16,6 +16,8 @@
         public List<Site> GetSiteRegistiesBySiteNo(string siteNo);
 
         public List<GatewayInfo> GetGatewayListHealth(string siteNo);
+
+        public SiteGateway? GetGatewayByDeviceNoAndSiteNo(string deviceNo,string siteNo);
     }
 
     public class GetwayRepository : Repository, IGetwayRepository
@@ -226,6 +228,21 @@
                 }
 
                 return list;
+            });
+        }
+
+        public SiteGateway? GetGatewayByDeviceNoAndSiteNo(string deviceNo, string siteNo)
+        {
+            string query = $@"select b.* from [dbo].[GatewayDevice] as a 
+                                inner join [dbo].[SiteGateway] as b
+                                on a.[GatewayId]=b.Id
+                                where a.DeviceNo='{deviceNo}'"; 
+
+            return Execute((conn) =>
+            {
+                var list = conn.Query<SiteGateway>(query).ToList();
+
+                return list?.FirstOrDefault();
             });
         }
     }

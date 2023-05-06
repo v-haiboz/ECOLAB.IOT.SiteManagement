@@ -36,12 +36,16 @@
             }
         }
 
-        public static SiteDeviceMeshTransformerDto GetSiteDeviceTransformers(string json)
+        public static SiteDeviceTransformerDto GetSiteDeviceFromMeshJson(string json)
         {
             JObject jObject = JObject.Parse(json);
-            var siteDeviceMesh = new SiteDeviceMeshTransformerDto();
+            var siteDeviceMesh = new SiteDeviceTransformerDto();
 
-            siteDeviceMesh.Version = jObject.SelectToken("version").ToString();
+            if (jObject.SelectToken("version") != null)
+            {
+
+                siteDeviceMesh.Version = jObject.SelectToken("version").ToString();
+            }
 
             var nodes = (JArray)jObject["nodes"];
 
@@ -70,11 +74,47 @@
             return siteDeviceMesh;
         }
 
-        public static string GetAllowListJson(List<SiteDeviceDto> siteDeviceDtos,string siteNo)
+        public static SiteDeviceTransformerDto GetSiteDeviceFromLoraJson(string json)
+        {
+            JObject jObject = JObject.Parse(json);
+            var siteDevice = new SiteDeviceTransformerDto();
+            if (jObject.SelectToken("version") != null)
+            {
+                siteDevice.Version = jObject.SelectToken("version").ToString();
+            }
+
+            var nodes = (JArray)jObject["nodes"];
+
+            if (nodes == null)
+                return siteDevice;
+
+            foreach (JToken node in nodes)
+            {
+                var deviceToken = node["SN"];
+                if (deviceToken == null)
+                {
+                    continue;
+                }
+                var deviceNo = deviceToken.ToString();
+                if (string.IsNullOrEmpty(deviceNo))
+                    continue;
+
+                siteDevice.DeviceTransformerDtos.Add(new DeviceTransformerDto()
+                {
+                    DeviceNo = deviceNo,
+                    JOjectInAllowList = node.ToString(),
+                    Json = json
+                });
+            }
+
+            return siteDevice;
+        }
+
+        public static string GetAllowListJson(List<SiteDeviceDetailInfoDto> siteDeviceDetailInfoDtos,string siteNo)
         {
             var jobject = new JObject();
             var deviceAllowList = new JArray();
-            foreach (var item in siteDeviceDtos)
+            foreach (var item in siteDeviceDetailInfoDtos)
             {
                 deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList)); 
             }

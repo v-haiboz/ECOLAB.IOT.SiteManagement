@@ -58,7 +58,7 @@
             <param name="DeviceNo"></param>
             <returns></returns>
         </member>
-        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDevicesBySiteNoOrMode(System.String)">
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDevicesBySiteNoOrMode(System.String,System.String)">
             <summary>
             查询site下有多少设备.
             </summary>

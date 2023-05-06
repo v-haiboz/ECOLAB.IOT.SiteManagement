@@ -8,15 +8,20 @@
     using Microsoft.Extensions.Configuration;
     using Microsoft.WindowsAzure.Storage;
     using Microsoft.WindowsAzure.Storage.Blob;
+    using System;
+    using System.Reflection.Metadata;
     using System.Text;
     using System.Threading.Tasks;
     using System.Web;
+    using BlobProperties = Azure.Storage.Blobs.Models.BlobProperties;
 
     public interface IStorageProvider
     {
         public Task<string> DownloadToText(string connectionString, string blobContainerName, string Url);
 
         public Task<string> GetBlobMD5(string connectionString, string blobContainerName, string Url);
+
+        public Task<string> GetBlobMD5ByBlobClient(string AccountName, string AccountKey, string Url);
 
         public Task<string> CopyToTargetContainer(string connectionString, string blobContainerName, string Url,string blobContainerName_Target,string targetRelativePath);
 
@@ -111,16 +116,17 @@
 
         }
 
-        public async Task<string> GetBlobMD5(string connectionString, string blobContainerName, string Url)
+        public async Task<string> GetBlobMD5(string connectionString, string blobContainerName, string blobName)
         {
+
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(connectionString);//storage connection string
 
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
 
-            CloudBlobContainer container = blobClient.GetContainerReference(blobContainerName);//container name
+            CloudBlobContainer container = cloudBlobClient.GetContainerReference(blobContainerName);//container name
 
             //Retrieve reference to a blob named "myblob".
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(Url);
+            CloudBlockBlob blockBlob = container.GetBlockBlobReference(blobName);
 
             await blockBlob.FetchAttributesAsync();//
 
@@ -129,7 +135,16 @@
             return md5;
         }
 
-      
+        public async Task<string> GetBlobMD5ByBlobClient(string AccountName, string AccountKey, string Url)
+        {
+            Uri uri = new Uri(Url);
+            var storageSharedKeyCredential = new StorageSharedKeyCredential(AccountName, AccountKey);
+            BlobClient blobClient = new BlobClient(uri, storageSharedKeyCredential);
+            BlobProperties properties = await blobClient.GetPropertiesAsync();
+            var hee = await blobClient.GetTagsAsync();
+            return properties.Metadata.ToString();
+        }
+
         public async Task<string> GetAllowListSASUrl(string url)
         {
             try
