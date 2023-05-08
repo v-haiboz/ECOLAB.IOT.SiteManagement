@@ -17,7 +17,7 @@
 
         public List<GatewayDevice>? GetGatewayDevicesByGatewayId(int gatewayId);
 
-        public bool GenarateJob(string siteNo, string gatewayNo, string allowListUrl);
+        public bool GenerateJob(string siteNo, string gatewayNo, string allowListUrl);
 
     }
 
@@ -31,7 +31,7 @@
         {
             if (string.IsNullOrEmpty(allowListUrl))
             {
-                throw new Exception("allowListUrl may fail to generate, pls double check.");
+                throw new Exception("allowListUrl may fail to generate.");
             }
 
             var site = Execute((conn) =>
@@ -44,7 +44,7 @@
 
             if (site == null)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var siteGateway = Execute((conn) =>
@@ -57,7 +57,7 @@
 
             if (siteGateway == null)
             {
-                throw new Exception("GatewayId doesn't exist, pls double check.");
+                throw new Exception("GatewayId doesn't exist.");
             }
 
             var exist = Execute((conn) =>
@@ -75,7 +75,7 @@
 
             if (!exist)
             {
-                throw new Exception($"Some device numbers do not exist, pls double check.");
+                throw new Exception($"Some device numbers doesn't exist.");
             }
 
             exist = Execute((conn) =>
@@ -138,7 +138,7 @@
         {
             if (string.IsNullOrEmpty(allowListUrl))
             {
-                throw new Exception("allowListUrl may fail to generate, pls double check.");
+                throw new Exception("allowListUrl may fail to generate.");
             }
 
             var siteId = Execute<float>((conn) =>
@@ -155,7 +155,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var siteGatewayId = Execute<float>((conn) =>
@@ -172,7 +172,7 @@
 
             if (siteGatewayId < 0)
             {
-                throw new Exception("GatewayId doesn't exist, pls double check.");
+                throw new Exception("GatewayId doesn't exist.");
             }
 
             var exist = Execute((conn) =>
@@ -190,7 +190,7 @@
 
             if (!exist)
             {
-                throw new Exception($"Some device numbers do not exist, pls double check.");
+                throw new Exception($"Some device numbers do not exist.");
             }
 
             return Execute((conn, transaction) =>
@@ -248,7 +248,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             return Execute((conn) =>
@@ -283,11 +283,11 @@
             });
         }
 
-        public bool GenarateJob(string siteNo, string gatewayNo, string allowListUrl)
+        public bool GenerateJob(string siteNo, string gatewayNo, string allowListUrl)
         {
             if (string.IsNullOrEmpty(allowListUrl))
             {
-                throw new Exception("allowListUrl may fail to generate, pls double check.");
+                throw new Exception("allowListUrl may fail to generate.");
             }
 
             var siteId = Execute<float>((conn) =>
@@ -304,7 +304,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var siteGatewayId = Execute<float>((conn) =>
@@ -321,7 +321,7 @@
 
             if (siteGatewayId < 0)
             {
-                throw new Exception("GatewayId doesn't exist, pls double check.");
+                throw new Exception("GatewayId doesn't exist.");
             }
 
             return Execute((conn, transaction) =>

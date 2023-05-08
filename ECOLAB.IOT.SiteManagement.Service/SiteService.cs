@@ -5,6 +5,7 @@
     using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
+    using ECOLAB.IOT.SiteManagement.Data.Exceptions;
     using ECOLAB.IOT.SiteManagement.Provider;
     using ECOLAB.IOT.SiteManagement.Repository;
     using Microsoft.Extensions.Configuration;
@@ -184,7 +185,7 @@
         {
             if (string.IsNullOrEmpty(siteNo))
             {
-                throw new Exception("SiteId doesn't empty.");
+                throw new BizException("SiteId doesn't empty.");
             }
             var siteRegisties = _siteRepository.GetSiteRegistiesBySiteNo(siteNo);
             var siteResitry = siteRegisties.FirstOrDefault();

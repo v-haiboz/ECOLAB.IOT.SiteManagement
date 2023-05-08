@@ -65,7 +65,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             return Execute((conn) =>
@@ -92,7 +92,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var siteGatewayId = Execute<float>((conn) =>
@@ -108,7 +108,7 @@
 
             if (siteGatewayId > 0)
             {
-                throw new Exception("SN exist, pls double check.");
+                throw new Exception("SN already exists.");
             }
 
             return Execute((conn) =>
@@ -136,7 +136,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var siteGatewayId = Execute<float>((conn) =>
@@ -152,7 +152,7 @@
 
             if (siteGatewayId < 0)
             {
-                throw new Exception("SN doesn't exist, pls double check.");
+                throw new Exception("SN doesn't exist.");
             }
 
 
@@ -189,6 +189,17 @@
 
         public List<GatewayInfo> GetGatewayListHealth(string siteNo)
         {
+            var site = Execute((conn) =>
+            {
+                string query = $@"SELECT *  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
+                return conn.Query<Site>(query).FirstOrDefault();
+            });
+
+            if (site ==null)
+            {
+                throw new Exception("SiteId doesn't exist.");
+            }
+
             var deviceList = Execute<List<string>>((conn) =>
             {
                 string query = $@"SELECT GatewayNo

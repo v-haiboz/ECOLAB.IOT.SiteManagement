@@ -1,7 +1,7 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Data.Dto
 {
     public class RegistryRequestDto
-    {
+    { 
         public string? Model { get; set; }
 
         public string? Url { get; set; }

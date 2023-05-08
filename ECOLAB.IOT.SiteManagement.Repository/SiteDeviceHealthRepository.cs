@@ -217,7 +217,7 @@
             var devices = string.Join("','", siteDeviceModes.Select(n => n.DeviceNo));
 
             var temp = string.Join("','", devices);
-            string query = $@"select m.DeviceId,m.Mode,n.Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
+            string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online' end end as Status from  ({sqltable}) as m
                             left join 
                             (select * from (SELECT  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,[FileURL], ROW_NUMBER() over (partition by a.[DeviceId] order by a.[CreatedOnUtc]) as rowNum
                               FROM [dbo].[nodeInfo] as a Left join [dbo].[fileInfo] as b
@@ -244,7 +244,7 @@
             var devices = string.Join("','", siteDeviceModes.Select(n => n.DeviceNo));
 
             var temp = string.Join("','", devices);
-            string query = $@"select m.DeviceId,m.Mode,n.Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
+            string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
                             left join 
                             (select * from (SELECT  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,Image_url as FileURL, ROW_NUMBER() over (partition by a.[DeviceId] order by a.[CreatedOnUtc]) as rowNum
                               FROM [dbo].[BaitStation] as a Left join [dbo].[FliesImage] as b

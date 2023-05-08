@@ -121,7 +121,7 @@
                 var connectionString = _config["BlobOfAllowList:ConnectionString"];
                 var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
                 var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{siteGateway.GatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
-                _gatewayDeviceRepository.GenarateJob(siteNo, siteGateway.GatewayNo, allowListUrl);
+                _gatewayDeviceRepository.GenerateJob(siteNo, siteGateway.GatewayNo, allowListUrl);
             }
         }
 

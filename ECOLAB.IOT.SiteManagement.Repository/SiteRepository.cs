@@ -3,7 +3,9 @@
     using Dapper;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
+    using ECOLAB.IOT.SiteManagement.Data.Exceptions;
     using Microsoft.Extensions.Configuration;
+    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Text;
 
@@ -38,7 +40,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             var validate = Execute((conn) =>
@@ -55,7 +57,7 @@
 
             if (!validate)
             {
-                throw new Exception($"Some device numbers do not exist, pls double check.");
+                throw new Exception($"Some device numbers do not exist.");
             }
 
             return Execute((conn) =>
@@ -68,19 +70,41 @@
             });
         }
 
+
+        public class GateWayDevice
+        { 
+           public string GatewayNo { get; set; }
+            public string DeviceNo { get; set; }
+        }
+
         public List<SiteDeviceDetailInfo> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo, string gatewayNo, List<string> deviceNos)
         {
-            //var site = Execute((conn) =>
-            //{
-            //    string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
-            //    var site = conn.Query<Site>(query);
-            //    return site.FirstOrDefault();
-            //});
+            var gateWayDevice = Execute((conn) =>
+            {
+                string query = $@"select b.GatewayNo,a.DeviceNo from [dbo].[GatewayDevice] as a
+                                inner join [dbo].[SiteGateway] as b
+                                on a.GatewayId=b.Id where a.DeviceNo in('{string.Join("','", deviceNos)}') and b.GatewayNo!='{gatewayNo}'";
+                var site = conn.Query<GateWayDevice>(query);
+                return site;
+            });
 
-            //if (site == null)
-            //{
-            //    throw new Exception("SiteId doesn't exist, pls double check.");
-            //}
+            if (gateWayDevice != null && gateWayDevice.Count()>0)
+            {
+                var gateways = gateWayDevice.Select(item => item.GatewayNo)?.ToList()?.Distinct();
+                var sb = new StringBuilder("Some Devices have been configured:");
+                if (gateways != null)
+                {
+                   
+                    foreach (var item in gateways)
+                    {
+                        var devices = gateWayDevice.Where(s => s.GatewayNo == $"{item}")?.ToList();
+                        sb.Append($"gateway({item})->'{string.Join("','", devices?.Select(device=>device.DeviceNo))}';") ;
+                    }
+                }
+                
+
+                throw new Exception(sb.ToString());
+            }
 
             //var gateway = Execute((conn) =>
             //{
@@ -95,22 +119,22 @@
             //    throw new Exception("gatewayNo doesn't exist, pls double check.");
             //}
 
-            //var validate = Execute((conn) =>
-            //{
-            //    var devicesList = string.Join("','", deviceNos);
-            //    string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={site.Id} and DeviceNo in('{devicesList}')";
-            //    var rows = conn.Query(query);
-            //    if (rows == null || rows.Count() <= 0 || (rows.Count() != deviceNos.Count))
-            //    {
-            //        return false;
-            //    }
-            //    return true;
-            //});
+            ////var validate = Execute((conn) =>
+            ////{
+            ////    var devicesList = string.Join("','", deviceNos);
+            ////    string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={site.Id} and DeviceNo in('{devicesList}')";
+            ////    var rows = conn.Query(query);
+            ////    if (rows == null || rows.Count() <= 0 || (rows.Count() != deviceNos.Count))
+            ////    {
+            ////        return false;
+            ////    }
+            ////    return true;
+            ////});
 
-            //if (!validate)
-            //{
-            //    throw new Exception($"Some device numbers do not exist, pls double check.");
-            //}
+            ////if (!validate)
+            ////{
+            ////    throw new Exception($"Some device numbers do not exist, pls double check.");
+            ////}
 
             return Execute((conn) =>
             {
@@ -148,7 +172,7 @@
 
                 if (!exist)
                 {
-                    throw new Exception($"siteNo:{siteNo} doesn't exist.");
+                    throw new BizException($"siteNo:{siteNo} doesn't exist.");
                 }
 
                 string query = $@"SELECT *
@@ -238,7 +262,7 @@
 
             if (siteId < 0)
             {
-                throw new Exception("SiteId doesn't exist, pls double check.");
+                throw new Exception("SiteId doesn't exist.");
             }
 
             if (site.SiteRegistries != null)
@@ -248,20 +272,31 @@
                     if (registry.SiteDevices != null)
                     {
                         var devices = registry.SiteDevices.Select(item => item.DeviceNo);
-                        var exist = Execute<List<string>>((conn) =>
+                        var exist = Execute((conn) =>
                         {
                             var deviceNos = string.Join("','", devices);
-                            string query = $@"SELECT distinct b.SiteNo  FROM [dbo].[SiteDevice] as a
+                            string query = $@"SELECT distinct b.SiteNo,a.DeviceNo FROM [dbo].[SiteDevice] as a
                                              inner join [dbo].[Site] as b
 	                                         on a.SiteId=b.Id where a.DeviceNo in ('{deviceNos}') and b.siteNo!='{siteNo}'";
-                            var siteNos = conn.Query<string>(query);
+                            var siteNos = conn.Query<SiteNoAndSiteDevice>(query);
                             return siteNos.ToList();
 
                         });
 
                         if (exist != null && exist.Count > 0)
                         {
-                            throw new Exception($"The devices of registry Mode {registry.Model} also exist in other gateways:{string.Join("','", exist)}.");
+                            var deviceNos=exist?.Select(item => item.DeviceNo);
+                            if (deviceNos == null)
+                            {
+                                deviceNos = new List<string>();
+                            }
+
+                            var siteNos = exist?.Select(item => item.SiteNo)?.ToList()?.Distinct();
+                            if (siteNos == null)
+                            {
+                                siteNos = new List<string>();
+                            }
+                            throw new Exception($"The devices:'{string.Join("','", deviceNos)}' of registry Mode {registry.Model} also exist in other SiteId:'{string.Join("','", siteNos)}'.");
                         }
                     }
                 }
@@ -274,16 +309,11 @@
                 return Ids?.ToList();
             });
 
-
-           
-
             return Execute((conn, transaction) =>
             {
                 try
                 {
                     var deviceNos = new List<string>();
-                    
-
                     if (site.SiteRegistries != null)
                     {
                         var devices = site.SiteRegistries.SelectMany(item => item.SiteDevices)?.ToList();
@@ -370,6 +400,12 @@
                     conn.Close();
                 }
             });
+        }
+
+        public class SiteNoAndSiteDevice
+        {
+            public string SiteNo { get; set; } = string.Empty;
+            public string DeviceNo { get; set; } = string.Empty;
         }
     }
 }

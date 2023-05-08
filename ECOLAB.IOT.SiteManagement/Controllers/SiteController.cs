@@ -1,10 +1,9 @@
 ﻿using ECOLAB.IOT.SiteManagement.Data.Dto;
+using ECOLAB.IOT.SiteManagement.Filters;
 using ECOLAB.IOT.SiteManagement.Service;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
-using Newtonsoft.Json.Linq;
-using System.ComponentModel;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -38,24 +37,17 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpGet("{siteId}")]
         public async Task<dynamic> Get([Required] string siteId)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                if (!string.IsNullOrEmpty(siteId))
-                {
-                    return await _siteService.GetRegistryBySiteNo(siteId);
-                }
-
-                var result = new JsonResult("SiteId can't empty.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                result.Data= await _siteService.GetRegistryBySiteNo(siteId);
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+           
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -65,26 +57,27 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <returns></returns>
         [Tags("Site")]
         [HttpPost]
+        
         public async Task<dynamic> Post(SiteRequestDto siteRequestDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (siteRequestDto.Validate())
                 {
-                    return await _siteService.Insert(siteRequestDto);
+                    result.Data = await _siteService.Insert(siteRequestDto);
                 }
-
-                var result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("SiteRequestDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
 
         }
 
@@ -98,24 +91,24 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpPut("{siteId}")]
         public async Task<dynamic> Put([Required] string siteId, SiteRequestDto siteRequestDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (siteRequestDto.Validate(false))
                 {
-                    return await _siteService.Update(siteId, siteRequestDto);
+                    result.Data = await _siteService.Update(siteId, siteRequestDto);
                 }
-
-                var result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("SiteRequestDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -128,33 +121,28 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpPost("{siteId}/gateway")]
         public async Task<dynamic> Post([Required] string siteId, GatewayRequestDto gatewayRequestDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                var result = new JsonResult("Insert into successful.");
-                result.StatusCode = (int)HttpStatusCode.OK;
                 if (gatewayRequestDto.Validate())
                 {
-                    var bl= await _getwayService.Insert(siteId, gatewayRequestDto.SN);
+                    var bl = await _getwayService.Insert(siteId, gatewayRequestDto.SN);
                     if (!bl)
                     {
-                        result = new JsonResult("Insert into failed.");
-                        result.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        result.Failure("Insert into failed.");
                     }
-
-                    return result;
                 }
-
-                result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("GatewayRequestDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                result.Errors.Add(ex.Message);
             }
 
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -167,34 +155,28 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpPut("{siteId}/gateway")]
         public async Task<dynamic> Put([Required] string siteId, GatewayRequestUpdateDto gatewayRequestUpdateDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                var result = new JsonResult("Updated successful.");
-                result.StatusCode= (int)HttpStatusCode.OK;
                 if (gatewayRequestUpdateDto.Validate())
                 {
-                    var bl= await _getwayService.Update(siteId, gatewayRequestUpdateDto.New, gatewayRequestUpdateDto.Old);
+                    var bl = await _getwayService.Update(siteId, gatewayRequestUpdateDto.New, gatewayRequestUpdateDto.Old);
 
                     if (!bl)
                     {
-                        result = new JsonResult("Updated failed.");
-                        result.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        result.Failure("Updated failed.");
                     }
-
-                    return result;
                 }
-
-                result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else {
+                    result.Failure("GatewayRequestUpdateDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -207,24 +189,24 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpGet("{siteId}/gateway")]
         public async Task<dynamic> GetGatewayBySiteId([Required] string siteId)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (!string.IsNullOrEmpty(siteId))
                 {
-                    return await _getwayService.GetGatewayListHealth(siteId);
+                    result.Data = await _getwayService.GetGatewayListHealth(siteId);
                 }
-
-                var result = new JsonResult("SiteId can't empty.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("siteId can't empty.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -238,33 +220,27 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [Route("{siteId}/gateway/{deviceNo}")]
         public async Task<dynamic> DeleteDeviceFromSite([Required] string siteId, [Required]  string deviceNo)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                var result = new JsonResult("Delete successful.");
-                result.StatusCode = (int)HttpStatusCode.OK;
                 if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceNo))
                 {
-                    var bl= await _gatewayDeviceService.Delete(siteId, deviceNo);
+                    var bl = await _gatewayDeviceService.Delete(siteId, deviceNo);
                     if (!bl)
                     {
-                        result = new JsonResult("Delete failed.");
-                        result.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        result.Failure("Delete failed.");
                     }
-
-                    return result;
                 }
-
-                result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else {
+                    result.Failure("siteId or deviceid can't empty.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -277,24 +253,24 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpGet("{siteId}/deviceList")]
         public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId, [FromQuery] string? gatewayId = "")
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (!string.IsNullOrEmpty(siteId))
                 {
-                    var list = await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId, gatewayId);
-                    return list.ToString();
+                    var list= await _gatewayDeviceService.QueryDeviceListBySiteNo(siteId, gatewayId);
+                    result.Data = list;
+                    return result.ToConvertJObj().ToString();
                 }
-
-                var result = new JsonResult("SiteId can't empty.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else {
+                    result.Failure("siteId or deviceid can't empty.");
+                    return result.ToJsonResult();
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
+                return result.ToJsonResult();
             }
         }
 
@@ -309,34 +285,27 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpPost("{siteId}/gateway/{gatewayId}")]
         public async Task<dynamic> ConfigureDeviceToDGW([Required] string siteId,string gatewayId, DeviceToDGWRequestDto deviceToDGWRequestDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                var result = new JsonResult("Insert into successful.");
-                result.StatusCode = (int)HttpStatusCode.OK;
-                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWRequestDto!=null && deviceToDGWRequestDto.Validate())
+                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWRequestDto != null && deviceToDGWRequestDto.Validate())
                 {
                     var url = await _gatewayDeviceService.ConfigureDeviceToDGW(siteId, gatewayId, deviceToDGWRequestDto);
                     if (string.IsNullOrEmpty(url))
                     {
-                        result = new JsonResult("Insert into failed.");
-                        result.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        result.Failure("Insert into failed.");
                     }
-
-                    return result;
                 }
-
-                result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else {
+                    result.Failure("siteId and gatewayId can't empty, or deviceToDGWRequestDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
 
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -350,33 +319,28 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpPut("{siteId}/gateway/{gatewayId}")]
         public async Task<dynamic> UpdateDeviceToDGW([Required] string siteId, string gatewayId, DeviceToDGWRequestDto deviceToDGWRequestDto)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
-                var result = new JsonResult("Update DeviceToDGW successful.");
-                result.StatusCode = (int)HttpStatusCode.OK;
                 if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWRequestDto != null && deviceToDGWRequestDto.Validate())
                 {
                     var url = await _gatewayDeviceService.UpdateDeviceToDGW(siteId, gatewayId, deviceToDGWRequestDto);
                     if (string.IsNullOrEmpty(url))
                     {
-                        result = new JsonResult("Update DeviceToDGW failed.");
-                        result.StatusCode = (int)HttpStatusCode.InternalServerError;
+                        result.Failure("Update DeviceToDGW failed.");
                     }
-
-                    return result;
                 }
-
-                result = new JsonResult("Request paramter Invalidate.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("siteId and gatewayId can't empty, or deviceToDGWRequestDto invalidate.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -389,24 +353,24 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpGet("{siteId}/{deviceId}")]
         public async Task<dynamic?> GetDeviceStatus([Required] string siteId, string deviceId)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceId))
                 {
-                    return await _siteDeviceHealthService.GetDeviceStatus(siteId, deviceId);
+                    result.Data= await _siteDeviceHealthService.GetDeviceStatus(siteId, deviceId);
                 }
-
-                var result = new JsonResult("siteId or deviceid can't empty.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else
+                {
+                    result.Failure("siteId or deviceid can't empty.");
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
             }
+
+            return result.ToJsonResult();
         }
 
         /// <summary>
@@ -419,24 +383,23 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         [HttpGet("{siteId}/health")]
         public async Task<dynamic?> GetDeviceStatusListBySiteId([Required] string siteId)
         {
+            var result = new UniformResponse<dynamic>();
             try
             {
                 if (!string.IsNullOrEmpty(siteId))
                 {
-                    var list = await _siteDeviceHealthService.GetDeviceStatusListBySiteId(siteId);
-                    return list.ToString();
+                    result.Data = await _siteDeviceHealthService.GetDeviceStatusListBySiteId(siteId);
+                    return result.ToConvertJObj().ToString();
                 }
-
-                var result = new JsonResult("siteId or deviceid can't empty.");
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-                return result;
+                else {
+                    result.Failure("siteId can't empty.");
+                    return result.ToJsonResult();
+                }
             }
             catch (Exception ex)
             {
-                var result = new JsonResult(ex.Message);
-                result.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                return result;
+                result.Errors.Add(ex.Message);
+                return result.ToJsonResult();
             }
         }
     }

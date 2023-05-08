@@ -17,17 +17,17 @@
         public TokenProvider(IConfiguration config)
         {
             _config = config;
-            _tokenUrl = _config["Token:Url"];
+            _tokenUrl = _config["Distribute:Token:Url"];
         }
         
         public async Task<TokenInfoDto> GetToken()
         {
             var result = await _tokenUrl.PostUrlEncodedAsync(new
             {
-                client_id = _config["Token:Client_id"],//"dd609f2a-99e0-4c1d-bd9f-58bdd4573384",
-                scope = _config["Token:Scope"],// "dd609f2a-99e0-4c1d-bd9f-58bdd4573384/.default",
-                client_secret = _config["Token:Client_secret"],// "i~5x_Gy2UrC1~R-k8h.KbDjM8bA.Z4DbhS",
-                grant_type = _config["Token:Grant_type"]//"client_credentials"
+                client_id = _config["Distribute:Token:Client_id"],//"dd609f2a-99e0-4c1d-bd9f-58bdd4573384",
+                scope = _config["Distribute:Token:Scope"],// "dd609f2a-99e0-4c1d-bd9f-58bdd4573384/.default",
+                client_secret = _config["Distribute:Token:Client_secret"],// "i~5x_Gy2UrC1~R-k8h.KbDjM8bA.Z4DbhS",
+                grant_type = _config["Distribute:Token:Grant_type"]//"client_credentials"
             }).ReceiveJson<TokenInfoDto>();
 
             return result;
