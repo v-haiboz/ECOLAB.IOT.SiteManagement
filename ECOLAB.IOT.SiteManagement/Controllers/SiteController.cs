@@ -180,6 +180,40 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="siteId"></param>
+        /// <param name="gatewayId"></param>
+        /// <returns></returns>
+        [Tags("Gateway")]
+        [HttpDelete("{siteId}/{gatewayId}")]
+        public async Task<dynamic> DeleteGateway([Required] string siteId, string gatewayId)
+        {
+            var result = new UniformResponse<dynamic>();
+            try
+            {
+                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId))
+                {
+                    var bl = await _getwayService.Delete(siteId, gatewayId);
+                    if (!bl)
+                    {
+                        result.Failure("Delete failed.");
+                    }
+                }
+                else
+                {
+                    result.Failure("siteId or gatewayId can't empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add(ex.Message);
+            }
+
+            return result.ToJsonResult();
+        }
+
+        /// <summary>
         /// 查询site下边有那些gateway
         /// </summary>
         /// <param name="siteId"></param>

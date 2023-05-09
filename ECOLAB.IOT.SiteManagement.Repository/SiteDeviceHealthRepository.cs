@@ -10,7 +10,7 @@
         public NodeFileInfo GetDeviceStatus(string siteNo, string deviceNo);
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo);
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo,string gatewayNo);
-
+       
         public List<NodeFileInfo>? GetDeviceListStatusFromExternalDb(List<SiteDeviceMode> siteDeviceModes);
     }
 
@@ -85,12 +85,10 @@
                 throw new Exception($"siteNo:{siteNo} doesn't exist.");
             }
 
-            string query = $@"SELECT Model ,a.DeviceNo,case when g.DeviceNo is null then 0 else 1 end as IsConfig
-                              FROM [dbo].[GatewayDevice] as a
-							  inner join [dbo].[SiteDevice] c
-							  on c.SiteId=a.SiteId and c.DeviceNo=a.DeviceNo
+            string query = $@"SELECT Model ,c.DeviceNo,case when g.DeviceNo is null then 0 else 1 end as IsConfig
+							  FROM [dbo].[SiteDevice] c
 							  inner join [dbo].[Site] as b
-							  on b.Id=a.SiteId
+							  on b.Id=c.SiteId
                               Inner join  [dbo].[SiteRegistry] as d
                               on d.SiteId=c.SiteId and d.Id=c.SiteRegistryId
                               left join [dbo].[GatewayDevice] as g

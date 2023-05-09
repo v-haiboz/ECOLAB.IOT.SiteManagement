@@ -1,5 +1,6 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Service
 {
+    using ECOLAB.IOT.SiteManagement.Common;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -113,18 +114,36 @@
         public static string GetAllowListJson(List<SiteDeviceDetailInfoDto> siteDeviceDetailInfoDtos,string siteNo)
         {
             var jobject = new JObject();
-            var deviceAllowList = new JArray();
-            foreach (var item in siteDeviceDetailInfoDtos)
-            {
-                deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList)); 
-            }
-
+         
             jobject.Add("siteId", siteNo);
-            jobject.Add("nodes", deviceAllowList);
+            var models = siteDeviceDetailInfoDtos?.Select(item => item.Model)?.ToList()?.Distinct();
+            if (models != null)
+            {
+                foreach (var model in models)
+                {
+                    var deviceAllowList = new JArray();
+                    var vccDevices = siteDeviceDetailInfoDtos?.Where(vcc => vcc.Model == model);
+                    if (vccDevices != null)
+                    {
+                        foreach (var item in vccDevices)
+                        {
+                            deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList));
+                        }
+                    }
+
+                    if (model.ToLowerInvariant() == ModelEnum.VCC.ToString().ToLowerInvariant())
+                    {
+                        jobject.Add("nodes", deviceAllowList);
+                    }
+                    else
+                    {
+                        jobject.Add($"nodes_{model}", deviceAllowList);
+                    }
+                }
+            }
+            
             var settings = new JsonSerializerSettings();
-
             settings.Formatting = Formatting.Indented;
-
             return JsonConvert.SerializeObject(jobject, settings);
         }
     }

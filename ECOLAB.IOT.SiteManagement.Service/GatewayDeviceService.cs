@@ -13,7 +13,7 @@
     {
         public Task<bool> Delete(string siteNo, string deviceNo);
 
-        public Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayNo = null, int pageIndex = 1, int pageSize = 50);
+        public Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayId = "", int pageIndex = 1, int pageSize = 50);
 
         public Task<string> ConfigureDeviceToDGW(string siteNo, string gatewayNo, DeviceToDGWRequestDto deviceToDGWRequestDto);
 
@@ -125,43 +125,70 @@
             }
         }
 
-        public async Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayNo= null, int pageIndex = 1, int pageSize = 1000)
+        private JObject? ConvertToJObject(List<GatewayDeviceMode>? gatewayDeviceMode,string gatewayNo="")
         {
-            var deviceModes = _siteDeviceHealthRepository.GetDeviceListFromInternalDb(siteNo, gatewayNo);
-
-            var healths = _siteDeviceHealthRepository.GetDeviceListStatusFromExternalDb(deviceModes);
-            var jobject = new JObject();
-            var modes = deviceModes.Select(item => item.Model).Distinct();
-            jobject.Add("id", siteNo);
-            if (modes == null || modes.Count() == 0)
+            if (gatewayDeviceMode == null || gatewayDeviceMode.Count==0)
             {
-                return jobject;
+                return null;
             }
 
-
-            foreach (var mode in modes)
+            var jobj = new JObject();
+            if (!string.IsNullOrEmpty(gatewayNo))
             {
-                var data = healths?.Where(item => item.Mode == mode).ToList();
-                List<dynamic> subList = new List<dynamic>();
-                foreach (var item in data)
+                jobj.Add("id", gatewayNo);
+            }
+
+            if (gatewayDeviceMode != null)
+            { 
+                var models = gatewayDeviceMode?.Select(item => item.Model)?.Distinct();
+                foreach (var model in models)
                 {
-                    subList.Add(new
+                    var data = gatewayDeviceMode?.Where(i => i.Model == model);
+                    if (data != null)
                     {
-                        id = item.DeviceId,
-                        connection_state = item.Status,
-                        last_seen = item.Last_seen
-                    });
+                        List<string> subList = new List<string>();
+                        foreach (var item in data)
+                        {
+                            subList.Add(item.DeviceNo);
+                        }
+                        jobj.Add(model, JArray.Parse(JsonConvert.SerializeObject(subList)));
+                    }
                 }
-                var total = data.Count;
-                var onlineCount = data.Where(item => item.Status == "online").Count();
-                var jtoken = new JObject();
-                jtoken.Add("total", total);
-                jtoken.Add("online", onlineCount);
-                jtoken.Add("data", JArray.Parse(JsonConvert.SerializeObject(subList)));
-
-                jobject.Add(mode, jtoken);
             }
 
+            return jobj;
+        }
+
+        public async Task<JObject> QueryDeviceListBySiteNo(string siteNo, string gatewayId = "", int pageIndex = 1, int pageSize = 1000)
+        {
+            var deviceModes = _gatewayDeviceRepository.GetGatewayDeviceListFromInternalDb(siteNo, gatewayId);
+            var jobject = new JObject();
+            jobject.Add("site_id", siteNo);
+            var noOwnerDevices= deviceModes?.Where(item => string.IsNullOrEmpty(item.GatewayNo))?.ToList();
+            var noOwnerDevicejobjs = ConvertToJObject(noOwnerDevices);
+            if(noOwnerDevicejobjs!=null)
+                jobject.Add("no_owner", noOwnerDevicejobjs);
+            var ownerDevices = deviceModes?.Where(item => !string.IsNullOrEmpty(item.GatewayNo))?.ToList();
+            var ownerGateways = ownerDevices?.Select(item => item.GatewayNo)?.ToList()?.Distinct();
+
+            if (ownerGateways != null)
+            {
+                List<dynamic> gateways = new List<dynamic>();
+                foreach (var gateway in ownerGateways)
+                {
+                    var gatewayDevices = ownerDevices?.Where(device => device.GatewayNo == gateway)?.ToList();
+                    var subJobj= ConvertToJObject(gatewayDevices, gateway);
+                    if (subJobj == null)
+                    {
+                        subJobj = new JObject();
+                    }
+
+                    gateways.Add(subJobj);
+                }
+
+                jobject.Add("gateway", JArray.Parse(JsonConvert.SerializeObject(gateways)));
+            }
+         
             return await Task.FromResult(jobject);
         }
     }

@@ -1,7 +1,10 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Service
 {
     using ECOLAB.IOT.SiteManagement.Data.Dto;
+    using ECOLAB.IOT.SiteManagement.Data.Entity;
+    using ECOLAB.IOT.SiteManagement.Provider;
     using ECOLAB.IOT.SiteManagement.Repository;
+    using Microsoft.Extensions.Configuration;
     using System.Threading.Tasks;
 
     public interface IGetwayService
@@ -18,14 +21,25 @@
     public class GetwayService : IGetwayService
     {
         private readonly IGetwayRepository _getwayRepository;
-        public GetwayService(IGetwayRepository getwayRepository)
+        private readonly IStorageProvider _storageProvider;
+        private readonly IConfiguration _config;
+        public GetwayService(IGetwayRepository getwayRepository, IStorageProvider storageProvider, IConfiguration config)
         {
             _getwayRepository = getwayRepository;
+            _storageProvider = storageProvider;
+            _config = config;
         }
 
         public async Task<bool> Delete(string siteNo, string sn)
         {
             var bl = _getwayRepository.Delete(siteNo, sn);
+            if (bl)
+            {
+                var connectionString = _config["BlobOfAllowList:ConnectionString"];
+                var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
+                var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{sn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
+
+            }
             return await Task.FromResult(bl);
         }
 
@@ -67,6 +81,13 @@
         public async Task<bool> Update(string siteNo, string newSn, string oldSn)
         {
             var bl = _getwayRepository.Update(siteNo, newSn, oldSn);
+            if (bl)
+            {
+                var connectionString = _config["BlobOfAllowList:ConnectionString"];
+                var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
+                var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{oldSn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
+
+            }
             return await Task.FromResult(bl);
         }
     }

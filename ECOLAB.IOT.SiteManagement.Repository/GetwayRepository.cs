@@ -4,6 +4,7 @@
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using Microsoft.Extensions.Configuration;
     using System.Linq;
+    using System.Transactions;
 
     public interface IGetwayRepository
     {
@@ -18,6 +19,7 @@
         public List<GatewayInfo> GetGatewayListHealth(string siteNo);
 
         public SiteGateway? GetGatewayByDeviceNoAndSiteNo(string deviceNo,string siteNo);
+
     }
 
     public class GetwayRepository : Repository, IGetwayRepository
@@ -52,28 +54,38 @@
 
         public bool Delete(string siteNo, string sn)
         {
-            var siteId = Execute<float>((conn) =>
+            var tuple = Execute((conn) =>
             {
-                string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
-                var Id = conn.ExecuteScalar(query);
-                if (Id == null)
-                {
-                    return -1;
-                }
-                return (Int64)Id;
+                string query = $@"SELECT a.Id as SiteId,b.Id as GatewayId
+  FROM [dbo].[Site] as a 
+  inner join [dbo].[SiteGateway] as b
+  on a.Id=b.SiteId
+  where a.SiteNo='{siteNo}' and b.GatewayNo='{sn}'";
+                var obj = conn.Query<Tuple<string,string>>(query)?.FirstOrDefault();
+                return obj;
             });
 
-            if (siteId < 0)
+            if (tuple==null)
             {
-                throw new Exception("SiteId doesn't exist.");
+                throw new Exception("SiteId or sn doesn't exist.");
             }
 
-            return Execute((conn) =>
+            return Execute((conn, transaction) =>
             {
-                var datetime = DateTime.UtcNow;
-                string query = $"delete from  SiteGateway where SiteId='{siteId}'and GatewayNo='{sn}'";
-                conn.Execute(query);
-                return true;
+                try
+                {
+                    string delete1 = $"delete from  SiteGateway where SiteId='{tuple.Item1}'and GatewayNo='{sn}'";
+                    conn.Execute(delete1, transaction: transaction);
+                    string delete2 = $"delete from  [dbo].[GatewayDevice] where SiteId='{tuple.Item1}'and GatewayId='{tuple.Item2}'";
+                    conn.Execute(delete2, transaction: transaction);
+                    transaction.Commit();
+                    return true;
+                }
+                catch
+                {
+                    transaction.Rollback();
+                    return false; ;
+                }
             });
         }
 

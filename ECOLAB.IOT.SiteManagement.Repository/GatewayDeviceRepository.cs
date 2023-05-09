@@ -17,6 +17,8 @@
 
         public List<GatewayDevice>? GetGatewayDevicesByGatewayId(int gatewayId);
 
+        public List<GatewayDeviceMode>? GetGatewayDeviceListFromInternalDb(string siteNo, string gatewayId = "");
+
         public bool GenerateJob(string siteNo, string gatewayNo, string allowListUrl);
 
     }
@@ -356,6 +358,52 @@
                 var list = conn.Query<GatewayDevice>(query);
 
                 return list?.ToList();
+            });
+        }
+
+        public List<GatewayDeviceMode>? GetGatewayDeviceListFromInternalDb(string siteNo, string gatewayId="")
+        {
+            var exist = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
+            {
+                string query = $@"SELECT Id
+                                  FROM [dbo].[Site]
+                                  where SiteNo='{siteNo}'";
+                var rows = conn.Query(query);
+                if (rows == null || rows.Count() <= 0)
+                {
+                    return false;
+                }
+                return true;
+            });
+
+            if (!exist)
+            {
+                throw new Exception($"siteNo:{siteNo} doesn't exist.");
+            }
+
+            var whereStr= $"where a.SiteNo = '{siteNo}'";
+            if (!string.IsNullOrEmpty(gatewayId))
+            {
+                whereStr = $"where a.SiteNo = '{siteNo}' and e.GatewayNo='{gatewayId}'";
+            }
+
+            string query = $@"SELECT Model ,d.DeviceNo, e.GatewayNo, case when g.DeviceNo is null then 0 else 1 end as IsConfig
+                         FROM [dbo].[Site] as a
+                              Inner join  [dbo].[SiteRegistry] as c
+                              on c.SiteId=a.Id
+							  inner join [dbo].[SiteDevice] as d
+							  on a.Id=d.SiteId and c.Id=d.SiteRegistryId
+                              left join [dbo].[GatewayDevice] as g
+							  on d.SiteId=g.SiteId and d.DeviceNo=g.DeviceNo
+							  left join [dbo].[SiteGateway] e
+							  on a.Id=e.SiteId and g.GatewayId=e.Id
+                              {whereStr}
+                              order by e.Id,Model";
+
+            return Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
+            {
+                var list = conn.Query<GatewayDeviceMode>(query).ToList();
+                return list;
             });
         }
     }

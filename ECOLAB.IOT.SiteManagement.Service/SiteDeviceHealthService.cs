@@ -63,12 +63,11 @@
 
             var jobject = new JObject();
             var modes = deviceModes.Select(item => item.Model).Distinct();
-            jobject.Add("id", siteNo);
+            jobject.Add("site_id", siteNo);
             if (modes == null || modes.Count() == 0)
             {
                 return jobject;
             }
-
 
             foreach (var mode in modes)
             {
@@ -76,15 +75,18 @@
                 List<dynamic> list = new List<dynamic>();
                 foreach (var item in data)
                 {
-                    list.Add(new
+                    if (item.Status == "online")
                     {
-                        id = item.DeviceId,
-                        connection_state = item.Status,
-                        last_seen = item.Last_seen
-                    });
+                        list.Add(new
+                        {
+                            id = item.DeviceId,
+                            connection_state = item.Status,
+                            last_seen = item.Last_seen
+                        });
+                    }
                 }
                 var total = data.Count;
-                var onlineCount = data.Where(item => item.Status == "online").Count();
+                var onlineCount = data.Where(item => item.Status == "online")?.Count();
                 var jtoken = new JObject();
                 jtoken.Add("total",total);
                 jtoken.Add("online", onlineCount);
