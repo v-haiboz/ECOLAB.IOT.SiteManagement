@@ -19,6 +19,8 @@
 
         public Task<string> UpdateDeviceToDGW(string siteNo, string gatewayNo, DeviceToDGWRequestDto deviceToDGWRequestDto);
 
+        public Task<bool> AddDeviceToDGWOneByOne(string siteNo, string gatewayNo, DeviceToDGWOneByOneRequestDto  deviceToDGWOneByOneRequestDto);
+
     }
 
     public class GatewayDeviceService : IGatewayDeviceService
@@ -43,7 +45,7 @@
         public async Task<string> ConfigureDeviceToDGW(string siteNo, string gatewayNo, DeviceToDGWRequestDto deviceToDGWRequestDto)
         {
 
-            var siteDeviceDetailInfoList= await _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds);
+            var siteDeviceDetailInfoList= _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds);
             if (siteDeviceDetailInfoList == null || siteDeviceDetailInfoList.Count <= 0 || deviceToDGWRequestDto.DeviceIds.Count!= siteDeviceDetailInfoList.Count)
             {
                 throw new Exception("Some device numbers do not exist");
@@ -51,7 +53,7 @@
 
             var connectionString = _config["BlobOfAllowList:ConnectionString"]; 
             var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
-            var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName,$"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json",Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
+            var allowListUrl = _storageProvider.UploadJsonToBlob(connectionString, blobContainerName,$"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json",Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
 
 
             var bl=_gatewayDeviceRepository.ConfigureDeviceToDGW(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds, allowListUrl);
@@ -61,13 +63,13 @@
                 throw new Exception("Configure Device To DGW failed ");
             }
 
-            return allowListUrl;
+            return await Task.FromResult(allowListUrl);
         }
 
         public async Task<string> UpdateDeviceToDGW(string siteNo, string gatewayNo, DeviceToDGWRequestDto deviceToDGWRequestDto)
         {
 
-            var siteDeviceDetailInfoList = await _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds);
+            var siteDeviceDetailInfoList = _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds);
             if (siteDeviceDetailInfoList == null || siteDeviceDetailInfoList.Count <= 0)
             {
                 throw new Exception("Some device numbers do not exist");
@@ -75,7 +77,7 @@
 
             var connectionString = _config["BlobOfAllowList:ConnectionString"];
             var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
-            var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
+            var allowListUrl = _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{gatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
 
 
             var bl = _gatewayDeviceRepository.UpdateDeviceToDGW(siteNo, gatewayNo, deviceToDGWRequestDto.DeviceIds, allowListUrl);
@@ -85,34 +87,32 @@
                 throw new Exception("Update Device To DGW failed ");
             }
 
-            return allowListUrl;
+            return await Task.FromResult(allowListUrl);
         }
 
         public async Task<bool> Delete(string siteNo, string deviceNo)
         {
-            var siteGateway = _getwayRepository.GetGatewayByDeviceNoAndSiteNo(siteNo, deviceNo);
+            var siteGateway = _getwayRepository.GetGatewayByDeviceNoAndSiteNo(deviceNo, siteNo);
             var bl = _gatewayDeviceRepository.Delete(siteNo, deviceNo);
             if (bl)
             {
-                await GenarateJob(siteGateway, siteNo);
+                 GenarateJob(siteGateway, siteNo);
             }
             return await Task.FromResult(bl);
         }
 
-        private async Task GenarateJob(SiteGateway? siteGateway,string siteNo)
+        private string GenarateJob(SiteGateway? siteGateway,string siteNo)
         {
             if (siteGateway != null)
             {
                 var deviceOfgateway = _gatewayDeviceRepository.GetGatewayDevicesByGatewayId(siteGateway.Id);
-
-
                 var list = deviceOfgateway?.Select(item => item.DeviceNo)?.ToList();
                 if (list == null)
                 {
                     list = new List<string>();
                 }
 
-                var siteDeviceDetailInfoList = await _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, siteGateway.GatewayNo, list);
+                var siteDeviceDetailInfoList = _siteService.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, siteGateway.GatewayNo, list);
                 if (siteDeviceDetailInfoList == null)
                 {
                     siteDeviceDetailInfoList = new List<SiteDeviceDetailInfoDto>();
@@ -120,9 +120,11 @@
 
                 var connectionString = _config["BlobOfAllowList:ConnectionString"];
                 var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
-                var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{siteGateway.GatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
+                var allowListUrl = _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{siteGateway.GatewayNo}/AllowList.Json", Utilities.GetAllowListJson(siteDeviceDetailInfoList, siteNo));
                 _gatewayDeviceRepository.GenerateJob(siteNo, siteGateway.GatewayNo, allowListUrl);
+                return allowListUrl;
             }
+            return "";
         }
 
         private JObject? ConvertToJObject(List<GatewayDeviceMode>? gatewayDeviceMode,string gatewayNo="")
@@ -140,16 +142,16 @@
 
             if (gatewayDeviceMode != null)
             { 
-                var models = gatewayDeviceMode?.Select(item => item.Model)?.Distinct();
+                var models = gatewayDeviceMode?.Where(g=>!string.IsNullOrEmpty(g.Model))?.Select(item => item.Model)?.Distinct();
                 foreach (var model in models)
                 {
                     var data = gatewayDeviceMode?.Where(i => i.Model == model);
                     if (data != null)
                     {
-                        List<string> subList = new List<string>();
+                        List<dynamic> subList = new List<dynamic>();
                         foreach (var item in data)
                         {
-                            subList.Add(item.DeviceNo);
+                            subList.Add(new { id= item.DeviceNo });
                         }
                         jobj.Add(model, JArray.Parse(JsonConvert.SerializeObject(subList)));
                     }
@@ -169,7 +171,7 @@
             if(noOwnerDevicejobjs!=null)
                 jobject.Add("no_owner", noOwnerDevicejobjs);
             var ownerDevices = deviceModes?.Where(item => !string.IsNullOrEmpty(item.GatewayNo))?.ToList();
-            var ownerGateways = ownerDevices?.Select(item => item.GatewayNo)?.ToList()?.Distinct();
+            var ownerGateways = ownerDevices?.Select(item => item.GatewayNo)?.Distinct()?.ToList();
 
             if (ownerGateways != null)
             {
@@ -190,6 +192,30 @@
             }
          
             return await Task.FromResult(jobject);
+        }
+
+        public async Task<bool> AddDeviceToDGWOneByOne(string siteNo, string gatewayNo, DeviceToDGWOneByOneRequestDto deviceToDGWOneByOneRequestDto)
+        {
+            var bl = _gatewayDeviceRepository.AddDeviceToDGWOneByOne(siteNo, gatewayNo, deviceToDGWOneByOneRequestDto.DeviceId , GenarateAllowList);
+
+            if (!bl)
+            {
+                throw new Exception("Add Device To DGW failed ");
+            }
+
+            return await Task.FromResult(bl);
+        }
+
+        private string GenarateAllowList(string siteNo, string gatewayNo)
+        {
+            var siteGateway = _getwayRepository.GetGatewayByGatewayNoAndSiteNo(gatewayNo, siteNo);
+            if (siteGateway!=null)
+            {
+              var allowListUrl=  GenarateJob(siteGateway, siteNo);
+              return allowListUrl;
+            }
+
+            return "";
         }
     }
 }

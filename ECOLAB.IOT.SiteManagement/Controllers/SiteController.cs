@@ -186,7 +186,7 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <param name="gatewayId"></param>
         /// <returns></returns>
         [Tags("Gateway")]
-        [HttpDelete("{siteId}/{gatewayId}")]
+        [HttpDelete("{siteId}/gateway/{gatewayId}")]
         public async Task<dynamic> DeleteGateway([Required] string siteId, string gatewayId)
         {
             var result = new UniformResponse<dynamic>();
@@ -251,15 +251,15 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <returns></returns>
         [Tags("Device")]
         [HttpDelete]
-        [Route("{siteId}/gateway/{deviceNo}")]
-        public async Task<dynamic> DeleteDeviceFromSite([Required] string siteId, [Required]  string deviceNo)
+        [Route("{siteId}/devicemapping/{deviceId}")]
+        public async Task<dynamic> DeleteDeviceFromSite([Required] string siteId, [Required]  string deviceId)
         {
             var result = new UniformResponse<dynamic>();
             try
             {
-                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceNo))
+                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceId))
                 {
-                    var bl = await _gatewayDeviceService.Delete(siteId, deviceNo);
+                    var bl = await _gatewayDeviceService.Delete(siteId, deviceId);
                     if (!bl)
                     {
                         result.Failure("Delete failed.");
@@ -284,7 +284,7 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <param name="mode"></param>
         /// <returns></returns>
         [Tags("Device")]
-        [HttpGet("{siteId}/deviceList")]
+        [HttpGet("{siteId}/devicemapping")]
         public async Task<dynamic> GetDevicesBySiteNoOrMode(string siteId, [FromQuery] string? gatewayId = "")
         {
             var result = new UniformResponse<dynamic>();
@@ -316,7 +316,7 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         /// <param name="deviceToDGWRequestDto"></param>
         /// <returns></returns>
         [Tags("Device")]
-        [HttpPost("{siteId}/gateway/{gatewayId}")]
+        [HttpPost("{siteId}/devicemapping/{gatewayId}")]
         public async Task<dynamic> ConfigureDeviceToDGW([Required] string siteId,string gatewayId, DeviceToDGWRequestDto deviceToDGWRequestDto)
         {
             var result = new UniformResponse<dynamic>();
@@ -342,31 +342,66 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
             return result.ToJsonResult();
         }
 
+        ///// <summary>
+        ///// 更新gateway下的设备.
+        ///// </summary>
+        ///// <param name="siteId"></param>
+        ///// <param name="gatewayId"></param>
+        ///// <param name="deviceToDGWRequestDto"></param>
+        ///// <returns></returns>
+        //[Tags("Device")]
+        //[HttpPut("{siteId}/devicemapping/{gatewayId}")]
+        //public async Task<dynamic> UpdateDeviceToDGW([Required] string siteId, string gatewayId, DeviceToDGWRequestDto deviceToDGWRequestDto)
+        //{
+        //    var result = new UniformResponse<dynamic>();
+        //    try
+        //    {
+        //        if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWRequestDto != null && deviceToDGWRequestDto.Validate())
+        //        {
+        //            var url = await _gatewayDeviceService.UpdateDeviceToDGW(siteId, gatewayId, deviceToDGWRequestDto);
+        //            if (string.IsNullOrEmpty(url))
+        //            {
+        //                result.Failure("Update DeviceToDGW failed.");
+        //            }
+        //        }
+        //        else
+        //        {
+        //            result.Failure("siteId and gatewayId can't empty, or deviceToDGWRequestDto invalidate.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Errors.Add(ex.Message);
+        //    }
+
+        //    return result.ToJsonResult();
+        //}
+
         /// <summary>
-        /// 更新gateway下的设备.
+        /// 添加一个设备到gateway.
         /// </summary>
         /// <param name="siteId"></param>
         /// <param name="gatewayId"></param>
-        /// <param name="deviceToDGWRequestDto"></param>
+        /// <param name="deviceToDGWOneByOneRequestDto"></param>
         /// <returns></returns>
         [Tags("Device")]
-        [HttpPut("{siteId}/gateway/{gatewayId}")]
-        public async Task<dynamic> UpdateDeviceToDGW([Required] string siteId, string gatewayId, DeviceToDGWRequestDto deviceToDGWRequestDto)
+        [HttpPatch("{siteId}/devicemapping/{gatewayId}")]
+        public async Task<dynamic> AddDeviceToDGWOneByOne([Required] string siteId, string gatewayId, DeviceToDGWOneByOneRequestDto deviceToDGWOneByOneRequestDto)
         {
             var result = new UniformResponse<dynamic>();
             try
             {
-                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWRequestDto != null && deviceToDGWRequestDto.Validate())
+                if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(gatewayId) && deviceToDGWOneByOneRequestDto != null && !string.IsNullOrEmpty(deviceToDGWOneByOneRequestDto.DeviceId))
                 {
-                    var url = await _gatewayDeviceService.UpdateDeviceToDGW(siteId, gatewayId, deviceToDGWRequestDto);
-                    if (string.IsNullOrEmpty(url))
+                    var bl = await _gatewayDeviceService.AddDeviceToDGWOneByOne(siteId, gatewayId, deviceToDGWOneByOneRequestDto);
+                    if (!bl)
                     {
-                        result.Failure("Update DeviceToDGW failed.");
+                        result.Failure("add Device to DGW failed.");
                     }
                 }
                 else
                 {
-                    result.Failure("siteId and gatewayId can't empty, or deviceToDGWRequestDto invalidate.");
+                    result.Failure("siteId and gatewayId and deviceId can't empty.");
                 }
             }
             catch (Exception ex)

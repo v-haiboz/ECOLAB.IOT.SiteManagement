@@ -1,7 +1,7 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Service
 {
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
-    using ECOLAB.IOT.SiteManagement.Data.Entity;
     using ECOLAB.IOT.SiteManagement.Provider;
     using ECOLAB.IOT.SiteManagement.Repository;
     using Microsoft.Extensions.Configuration;
@@ -33,11 +33,16 @@
         public async Task<bool> Delete(string siteNo, string sn)
         {
             var bl = _getwayRepository.Delete(siteNo, sn);
+            if (!Utility.ValidateSN(sn, out var message))
+            {
+                throw new Exception(message);
+            }
+
             if (bl)
             {
                 var connectionString = _config["BlobOfAllowList:ConnectionString"];
                 var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
-                var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{sn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
+                var allowListUrl = _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{sn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
 
             }
             return await Task.FromResult(bl);
@@ -74,18 +79,33 @@
 
         public async Task<bool> Insert(string siteNo, string sn)
         {
+            if (!Utility.ValidateSN(sn, out var message))
+            {
+                throw new Exception(message);
+            }
+
             var bl = _getwayRepository.Insert(siteNo, sn);
             return await Task.FromResult(bl);
         }
 
         public async Task<bool> Update(string siteNo, string newSn, string oldSn)
         {
+            if (!Utility.ValidateSN(newSn, out var message1))
+            {
+                throw new Exception($"newSn:{message1}");
+            }
+
+            if (!Utility.ValidateSN(oldSn, out var message2))
+            {
+                throw new Exception($"oldSn:{message2}");
+            }
+            
             var bl = _getwayRepository.Update(siteNo, newSn, oldSn);
             if (bl)
             {
                 var connectionString = _config["BlobOfAllowList:ConnectionString"];
                 var blobContainerName = _config["BlobOfAllowList:BlobContainerName"];
-                var allowListUrl = await _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{oldSn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
+                var allowListUrl = _storageProvider.UploadJsonToBlob(connectionString, blobContainerName, $"gwconfigfile/deviceAllowList/{siteNo}/{oldSn}/AllowList.Json", Utilities.GetAllowListJson(null, siteNo));
 
             }
             return await Task.FromResult(bl);

@@ -42,6 +42,14 @@
             <param name="gatewayRequestUpdateDto"></param>
             <returns></returns>
         </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.DeleteGateway(System.String,System.String)">
+            <summary>
+            
+            </summary>
+            <param name="siteId"></param>
+            <param name="gatewayId"></param>
+            <returns></returns>
+        </member>
         <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetGatewayBySiteId(System.String)">
             <summary>
             查询site下边有那些gateway
@@ -75,13 +83,13 @@
             <param name="deviceToDGWRequestDto"></param>
             <returns></returns>
         </member>
-        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.UpdateDeviceToDGW(System.String,System.String,ECOLAB.IOT.SiteManagement.Data.Dto.DeviceToDGWRequestDto)">
+        <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.AddDeviceToDGWOneByOne(System.String,System.String,ECOLAB.IOT.SiteManagement.Data.Dto.DeviceToDGWOneByOneRequestDto)">
             <summary>
-            更新gateway下的设备.
+            添加一个设备到gateway.
             </summary>
             <param name="siteId"></param>
             <param name="gatewayId"></param>
-            <param name="deviceToDGWRequestDto"></param>
+            <param name="deviceToDGWOneByOneRequestDto"></param>
             <returns></returns>
         </member>
         <member name="M:ECOLAB.IOT.SiteManagement.Controllers.SiteController.GetDeviceStatus(System.String,System.String)">

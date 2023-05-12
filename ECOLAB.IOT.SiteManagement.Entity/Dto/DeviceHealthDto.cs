@@ -1,11 +1,13 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Data.Dto
 {
     using System;
+    using System.Text.Json.Serialization;
 
     public class DeviceHealthDto
     {
         public string? Id { get; set; }
 
+        [JsonPropertyName("site_id")]
         public string? SiteId { get; set; }
 
         public string? Connection_state { get; set; } = "offline";

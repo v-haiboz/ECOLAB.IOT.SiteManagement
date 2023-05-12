@@ -3,6 +3,8 @@
     using Dapper;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using Microsoft.Extensions.Configuration;
+    using System.Linq.Expressions;
+    using System.Reflection.Metadata.Ecma335;
     using System.Text;
 
     public interface IGatewayDeviceRepository
@@ -14,6 +16,8 @@
         public bool ConfigureDeviceToDGW(string siteNo, string gatewayNo, List<string> deviceNos,string allowListUrl);
 
         public bool UpdateDeviceToDGW(string siteNo, string gatewayNo, List<string> deviceNos, string allowListUrl);
+
+        public bool AddDeviceToDGWOneByOne(string siteNo, string gatewayNo, string deviceNo, Func<string, string, string> funcOfAllowList);
 
         public List<GatewayDevice>? GetGatewayDevicesByGatewayId(int gatewayId);
 
@@ -36,28 +40,36 @@
                 throw new Exception("allowListUrl may fail to generate.");
             }
 
-            var site = Execute((conn) =>
+            var siteId = Execute<float>((conn) =>
             {
-                string query = $@"SELECT *  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
-                var site = conn.Query<Site>(query);
+                string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
+                var Id = conn.ExecuteScalar(query);
+                if (Id == null)
+                {
+                    return -1;
+                }
 
-                return site.FirstOrDefault();
+                return (Int64)Id;
             });
 
-            if (site == null)
+            if (siteId < 0)
             {
                 throw new Exception("SiteId doesn't exist.");
             }
 
-            var siteGateway = Execute((conn) =>
+            var siteGatewayId = Execute<float>((conn) =>
             {
-                string query = $@"SELECT * FROM [dbo].[SiteGateway] as a where a.SiteId='{site.Id}' and a.GatewayNo='{gatewayNo}'";
-                var rows = conn.Query<SiteGateway>(query);
+                string query = $@"SELECT Id  FROM [dbo].[SiteGateway] as a where a.SiteId='{siteId}' and a.GatewayNo='{gatewayNo}'";
+                var Id = conn.ExecuteScalar(query);
+                if (Id == null)
+                {
+                    return -1;
+                }
 
-                return rows.FirstOrDefault();
+                return (Int64)Id;
             });
 
-            if (siteGateway == null)
+            if (siteGatewayId < 0)
             {
                 throw new Exception("GatewayId doesn't exist.");
             }
@@ -65,7 +77,7 @@
             var exist = Execute((conn) =>
             {
                 var devicesList = string.Join("','", deviceNos);
-                string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={site.Id} and DeviceNo in('{devicesList}')";
+                string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={siteId} and DeviceNo in('{devicesList}')";
                 var rows = conn.Query(query);
                 if (rows == null || rows.Count() <= 0 || (rows.Count() != deviceNos.Count))
                 {
@@ -77,37 +89,23 @@
 
             if (!exist)
             {
-                throw new Exception($"Some device numbers doesn't exist.");
+                throw new Exception($"Some device numbers do not exist.");
             }
-
-            exist = Execute((conn) =>
-            {
-                string query = $@"SELECT Id FROM [dbo].[GatewayDevice] as a where a.GatewayId='{siteGateway.Id}'";
-                var rows = conn.Query(query);
-                if (rows == null || rows.Count() <= 0)
-                {
-                    return false;
-                }
-                return true;
-            });
-
-            if (exist)
-            {
-                throw new Exception($"GatewayNo:{gatewayNo}  already has a matching device list.");
-            }
-
 
             return Execute((conn, transaction) =>
             {
                 try
                 {
 
+                    string deleteGatewayDevice = $@"delete FROM [dbo].[GatewayDevice] where GatewayId='{siteGatewayId}' and SiteId='{siteId}'";
+                    conn.Execute(deleteGatewayDevice, transaction: transaction);
+
                     var datetime = DateTime.UtcNow;
                     var insertSqlSb = new StringBuilder();
                     insertSqlSb.Append("INSERT INTO [GatewayDevice] (SiteId, GatewayId,DeviceNo,CreatedAt) VALUES ");
                     foreach (var deviceNo in deviceNos)
                     {
-                        insertSqlSb.AppendFormat("('{0}','{1}','{2}','{3}'),", site.Id, siteGateway.Id, deviceNo, datetime);
+                        insertSqlSb.AppendFormat("('{0}','{1}','{2}','{3}'),", siteId, siteGatewayId, deviceNo, datetime);
                     }
 
                     if (deviceNos != null && deviceNos.Count > 0)
@@ -117,8 +115,11 @@
                         conn.Execute(sql.ToString(), transaction: transaction);
                     }
 
+                    string deleteGatewayAllowListTask = $@"delete FROM [dbo].[GatewayAllowListTask] where GatewayId='{siteGatewayId}' and SiteId='{siteId}'";
+                    conn.Execute(deleteGatewayAllowListTask, transaction: transaction);
+
                     var insertTaskSql = $"INSERT INTO [GatewayAllowListTask] (SiteId,SiteNo ,GatewayId,GatewayNo,AllowListUrl,Status,CreatedAt) " +
-                    $"values ('{site.Id}','{siteNo}','{siteGateway.Id}','{gatewayNo}','{allowListUrl}','0','{datetime}')";
+                    $"values ('{siteId}','{siteNo}','{siteGatewayId}','{gatewayNo}','{allowListUrl}','0','{datetime}')";
                     conn.Execute(insertTaskSql, transaction: transaction);
                     transaction.Commit();
                     return true;
@@ -241,14 +242,14 @@
 
         public bool Delete(string siteNo, string deviceNo)
         {
-            var siteId = Execute<float>((conn) =>
+            var site = Execute((conn) =>
             {
                 string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
-                var Id = conn.ExecuteScalar(query);
-                return (Int64)Id;
+                var rows = conn.Query(query);
+                return rows.FirstOrDefault();
             });
 
-            if (siteId < 0)
+            if (site == null)
             {
                 throw new Exception("SiteId doesn't exist.");
             }
@@ -256,7 +257,7 @@
             return Execute((conn) =>
             {
                 var datetime = DateTime.UtcNow;
-                string query = $"delete from GatewayDevice where SiteId='{siteId}'and DeviceNo='{deviceNo}'";
+                string query = $"delete from GatewayDevice where SiteId='{site.Id}' and DeviceNo='{deviceNo}'";
                 conn.Execute(query);
                 return true;
             });
@@ -378,7 +379,28 @@
 
             if (!exist)
             {
-                throw new Exception($"siteNo:{siteNo} doesn't exist.");
+                throw new Exception($"SiteId:{siteNo} doesn't exist.");
+            }
+
+            if (!string.IsNullOrEmpty(gatewayId))
+            {
+                exist = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
+                {
+                    string query = $@"SELECT *
+                                  FROM [dbo].[SiteGateway] 
+                                  where GatewayNo='{gatewayId}'";
+                    var rows = conn.Query(query);
+                    if (rows == null || rows.Count() <= 0)
+                    {
+                        return false;
+                    }
+                    return true;
+                });
+
+                if (!exist)
+                {
+                    throw new Exception($"GatewayId:{gatewayId} doesn't exist.");
+                }
             }
 
             var whereStr= $"where a.SiteNo = '{siteNo}'";
@@ -398,13 +420,113 @@
 							  left join [dbo].[SiteGateway] e
 							  on a.Id=e.SiteId and g.GatewayId=e.Id
                               {whereStr}
-                              order by e.Id,Model";
+                    union 
+                         SELECT null ,null, e.GatewayNo, 0
+                         FROM [dbo].[Site] as a
+							  left join [dbo].[SiteGateway] e
+							  on a.Id=e.SiteId 
+							   {whereStr}
+							  and  not exists (select GatewayId from [dbo].[GatewayDevice] as c 
+							  where e.Id=c.SiteId)";
 
             return Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
             {
                 var list = conn.Query<GatewayDeviceMode>(query).ToList();
                 return list;
             });
+        }
+
+        public bool AddDeviceToDGWOneByOne(string siteNo, string gatewayNo, string deviceNo, Func<string,string, string> funcOfAllowList)
+        {
+            var siteId = Execute<float>((conn) =>
+            {
+                string query = $@"SELECT Id  FROM [dbo].[Site] as a where a.SiteNo='{siteNo}'";
+                var Id = conn.ExecuteScalar(query);
+                if (Id == null)
+                {
+                    return -1;
+                }
+
+                return (Int64)Id;
+            });
+
+            if (siteId < 0)
+            {
+                throw new Exception("SiteId doesn't exist.");
+            }
+
+            var siteGatewayId = Execute<float>((conn) =>
+            {
+                string query = $@"SELECT Id  FROM [dbo].[SiteGateway] as a where a.SiteId='{siteId}' and a.GatewayNo='{gatewayNo}'";
+                var Id = conn.ExecuteScalar(query);
+                if (Id == null)
+                {
+                    return -1;
+                }
+
+                return (Int64)Id;
+            });
+
+            if (siteGatewayId < 0)
+            {
+                throw new Exception("GatewayId doesn't exist.");
+            }
+
+            var device = Execute((conn) =>
+            {
+                string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={siteId} and DeviceNo ='{deviceNo}'";
+                var row = conn.Query(query).FirstOrDefault();
+                
+                return row;
+            });
+
+            if (device == null)
+            {
+                throw new Exception($"deviceNo:'{deviceNo}' do not exist.");
+            }
+
+            var bl= Execute((conn) =>
+            {
+                try
+                {
+
+                    var datetime = DateTime.UtcNow;
+                    var sql = $"INSERT INTO [GatewayDevice] (SiteId, GatewayId,DeviceNo,CreatedAt) VALUES ('{siteId}','{siteGatewayId}','{deviceNo}','{datetime}')";
+                    conn.Execute(sql);
+
+                    if (funcOfAllowList != null)
+                    {
+                        var allowListUrl = funcOfAllowList(siteNo, gatewayNo);
+                        if (string.IsNullOrEmpty(allowListUrl))
+                        {
+                            throw new Exception("allowListUrl may fail to generate.");
+                        }
+                        var insertTaskSql = $"INSERT INTO [GatewayAllowListTask] (SiteId,SiteNo ,GatewayId,GatewayNo,AllowListUrl,Status,CreatedAt) " +
+                                            $"values ('{siteId}','{siteNo}','{siteGatewayId}','{gatewayNo}','{allowListUrl}','0','{datetime}')";
+                        conn.Execute(insertTaskSql);
+                        return true;
+                    }
+                    else 
+                    {
+                        throw new Exception("allowListUrl may fail to generate.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (funcOfAllowList != null)
+                    {
+                        var allowListUrl = funcOfAllowList(siteNo, gatewayNo);
+                    }
+
+                    return false;
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            });
+
+            return bl;
         }
     }
 }

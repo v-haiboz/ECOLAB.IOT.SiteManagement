@@ -5,11 +5,11 @@
     /// </summary>
     public class BizException : Exception
     {
-        public int status = 601;
+        public int status = 400;
         /// <summary>
         /// 
         /// </summary>
-        public BizException(int status = 601)
+        public BizException(int status = 400)
         {
             this.status = status;
         }
@@ -17,7 +17,7 @@
         /// 
         /// </summary>
         /// <param name="message"></param>
-        public BizException(string message, int status = 601) : base(message)
+        public BizException(string message, int status = 400) : base(message)
         {
             this.status = status;
         }
@@ -26,7 +26,7 @@
         /// </summary>
         /// <param name="message"></param>
         /// <param name="ex"></param>
-        public BizException(string message, Exception ex, int status = 601) : base(message, ex)
+        public BizException(string message, Exception ex, int status = 400) : base(message, ex)
         {
             this.status = status;
         }

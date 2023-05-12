@@ -20,13 +20,19 @@
 
         public SiteGateway? GetGatewayByDeviceNoAndSiteNo(string deviceNo,string siteNo);
 
+        public SiteGateway? GetGatewayByGatewayNoAndSiteNo(string gatewayNo, string siteNo);
+
     }
 
     public class GetwayRepository : Repository, IGetwayRepository
     {
-        
+        private int _onlineDays = -1;
         public GetwayRepository(IConfiguration config) : base(config)
         {
+            if (int.TryParse(_config["Health:OnlineDays"], out var onlineDays))
+            {
+                _onlineDays = -1 * onlineDays;
+            }
         }
 
         public List<Site> GetSiteRegistiesBySiteNo(string siteNo) {
@@ -61,7 +67,7 @@
   inner join [dbo].[SiteGateway] as b
   on a.Id=b.SiteId
   where a.SiteNo='{siteNo}' and b.GatewayNo='{sn}'";
-                var obj = conn.Query<Tuple<string,string>>(query)?.FirstOrDefault();
+                var obj = conn.Query(query)?.FirstOrDefault();
                 return obj;
             });
 
@@ -74,9 +80,9 @@
             {
                 try
                 {
-                    string delete1 = $"delete from  SiteGateway where SiteId='{tuple.Item1}'and GatewayNo='{sn}'";
+                    string delete1 = $"delete from  SiteGateway where SiteId='{tuple.SiteId}'and GatewayNo='{sn}'";
                     conn.Execute(delete1, transaction: transaction);
-                    string delete2 = $"delete from  [dbo].[GatewayDevice] where SiteId='{tuple.Item1}'and GatewayId='{tuple.Item2}'";
+                    string delete2 = $"delete from  [dbo].[GatewayDevice] where SiteId='{tuple.SiteId}'and GatewayId='{tuple.GatewayId}'";
                     conn.Execute(delete2, transaction: transaction);
                     transaction.Commit();
                     return true;
@@ -236,9 +242,9 @@
             var deviceNo = string.Join("','", deviceList);
 
             string query = $@"select * from
-                            (select Id, substring(DeviceId,5,LEN(DeviceId)-4) as DeviceId,'online' as ConnectionState,CreatedOnUtc,
+                            (select Id,DeviceId,'online' as ConnectionState,CreatedOnUtc,
                             ROW_NUMBER() over( partition by DeviceId order by CreatedOnUtc desc) as new_index
-                            from GatewayInfo where DeviceId in('DGW-{deviceNo}') and [CreatedOnUtc]>DATEADD(DAY,-1,GETDATE())) b where b.new_index = 1";  //PVM-ECOLAB19
+                            from GatewayInfo where DeviceId in('{deviceNo}') and [CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())) b where b.new_index = 1";  //PVM-ECOLAB19
 
             return Execute(_config["ConnectionStrings:SqlConnectionStringHealthDGW"],(conn) =>
             {
@@ -256,10 +262,25 @@
 
         public SiteGateway? GetGatewayByDeviceNoAndSiteNo(string deviceNo, string siteNo)
         {
-            string query = $@"select b.* from [dbo].[GatewayDevice] as a 
+            string query = $@"select b.[Id],b.[SiteId],b.GatewayNo,b.[UpdatedAt],b.[CreatedAt] from [dbo].[GatewayDevice] as a 
                                 inner join [dbo].[SiteGateway] as b
                                 on a.[GatewayId]=b.Id
                                 where a.DeviceNo='{deviceNo}'"; 
+
+            return Execute((conn) =>
+            {
+                var list = conn.Query<SiteGateway>(query).ToList();
+
+                return list?.FirstOrDefault();
+            });
+        }
+
+        public SiteGateway? GetGatewayByGatewayNoAndSiteNo(string gatewayNo, string siteNo)
+        {
+            string query = $@"select b.[Id],b.[SiteId],b.GatewayNo,b.[UpdatedAt],b.[CreatedAt] 
+                                from [dbo].[Site] as a 
+                                inner join [dbo].[SiteGateway] as b
+                                on a.Id=b.SiteId where b.GatewayNo='{gatewayNo}'";
 
             return Execute((conn) =>
             {

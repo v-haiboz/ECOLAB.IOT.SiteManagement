@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Data", "ECOLAB.IOT.SiteManagement.Entity\ECOLAB.IOT.SiteManagement.Data.csproj", "{798A50A6-C7C7-44A8-9B59-0C4528780805}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ECOLAB.IOT.SiteManagement.Common", "ECOLAB.IOT.SiteManagement.Common\ECOLAB.IOT.SiteManagement.Common.csproj", "{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ECOLAB.IOT.SiteManagement.Common", "ECOLAB.IOT.SiteManagement.Common\ECOLAB.IOT.SiteManagement.Common.csproj", "{8E5C328D-2673-40D5-B397-DB2CAD6F1A8B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

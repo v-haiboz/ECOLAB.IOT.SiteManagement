@@ -172,7 +172,7 @@
 
                 if (!exist)
                 {
-                    throw new BizException($"siteNo:{siteNo} doesn't exist.");
+                    throw new BizException($"SiteId:{siteNo} doesn't exist.");
                 }
 
                 string query = $@"SELECT *

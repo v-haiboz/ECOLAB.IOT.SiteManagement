@@ -23,7 +23,7 @@
         public Task<SiteResponseDto> GetRegistryBySiteNo(string siteNo);
         public Task<List<SiteDeviceDto>> GeAllowListOfSiteDeviceBySiteNoAndDeviceNos(string siteNo,List<string> deviceNos);
 
-        public Task<List<SiteDeviceDetailInfoDto>> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo,string gatewayNo, List<string> deviceNos);
+        public List<SiteDeviceDetailInfoDto> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo,string gatewayNo, List<string> deviceNos);
     }
 
     public class SiteService : ISiteService
@@ -225,7 +225,7 @@
             return await Task.FromResult(result);
         }
 
-        public async Task<List<SiteDeviceDetailInfoDto>> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo, string gatewayNo, List<string> deviceNos)
+        public List<SiteDeviceDetailInfoDto> GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(string siteNo, string gatewayNo, List<string> deviceNos)
         {
             var list = _siteRepository.GeAllowListOfSiteDeviceBySiteNoAndGatewayNoAndDeviceNos(siteNo, gatewayNo, deviceNos);
 
@@ -236,7 +236,7 @@
                 result.Add(item.CovertToSiteDeviceDto());
             }
 
-            return await Task.FromResult(result);
+            return result;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Data.Entity
 {
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using System;
 
     public class SiteGateway

@@ -25,7 +25,7 @@
 
         public Task<string> CopyToTargetContainer(string connectionString, string blobContainerName, string Url,string blobContainerName_Target,string targetRelativePath);
 
-        public Task<string> UploadJsonToBlob(string connectionString, string blobContainerName,string fileName, string json);
+        public string UploadJsonToBlob(string connectionString, string blobContainerName,string fileName, string json);
 
         public Task<string> GetAllowListSASUrl(string url);
     }
@@ -71,7 +71,7 @@
             }
         }
 
-        public async Task<string> UploadJsonToBlob(string connectionString, string blobContainerName, string fileName, string json)
+        public string UploadJsonToBlob(string connectionString, string blobContainerName, string fileName, string json)
         {
             BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
             BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(blobContainerName);
@@ -90,7 +90,7 @@
 
             MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json));
             BlobClient blob = containerClient.GetBlobClient(fileName);
-            await blob.UploadAsync(ms, options);
+            blob.Upload(ms, options);
             return blob.Uri.ToString();
         }
 
