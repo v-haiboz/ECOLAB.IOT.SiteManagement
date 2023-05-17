@@ -100,7 +100,7 @@
         }
 
 
-        private async Task<Site> CovertToSite(SiteRequestDto siteRequestDto)
+        private async Task<Site> CovertToSite(SiteRequestDto siteRequestDto,string siteNo=null)
         {
             if (siteRequestDto == null)
             {
@@ -109,7 +109,7 @@
 
             var site = new Site()
             {
-                SiteNo = Guid.NewGuid().ToString(),
+                SiteNo = string.IsNullOrEmpty(siteNo)?Guid.NewGuid().ToString():siteNo,
                 CreatedAt = DateTime.UtcNow
             };
 

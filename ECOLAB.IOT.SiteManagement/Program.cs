@@ -2,7 +2,10 @@ using ECOLAB.IOT.SiteManagement.Filters;
 using ECOLAB.IOT.SiteManagement.Quartz;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.AzureAD.UI;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Web;
+using Microsoft.OpenApi.Models;
 
 namespace ECOLAB.IOT.SiteManagement
 {
@@ -15,6 +18,19 @@ namespace ECOLAB.IOT.SiteManagement
             {
                 serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(2);
             });
+
+            #region 读取Configuration
+            var azureAdClientId = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AAD_ClientId")) ?
+                builder.Configuration["AAD:ClientId"] : Environment.GetEnvironmentVariable("AAD_ClientId");
+            var swaggerClientId = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("Swagger_ClientId")) ?
+                builder.Configuration["AAD:SwaggerClientId"] : Environment.GetEnvironmentVariable("Swagger_ClientId");
+            var instance = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AAD_Instance")) ?
+                builder.Configuration["AAD:Instance"] : Environment.GetEnvironmentVariable("AAD_Instance");
+            var tenantId = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AAD_TenantId")) ?
+                builder.Configuration["AAD:TenantId"] : Environment.GetEnvironmentVariable("AAD_TenantId");
+            var domain = string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("AAD_Domain")) ?
+                builder.Configuration["AAD:Domain"] : Environment.GetEnvironmentVariable("AAD_Domain");
+            #endregion
             // Add services to the container.
             builder.Services.AddServices()
                 .AddSwaggerGen(c => {
@@ -36,17 +52,56 @@ namespace ECOLAB.IOT.SiteManagement
             builder.Services.AddSwaggerGen(c =>
             {
                 //c.OperationFilter<SwaggerParametersAttributeHandler>();
+                c.AddSecurityDefinition("AAD", new OpenApiSecurityScheme
+                {
+                    Type = SecuritySchemeType.OAuth2,
+                    In = ParameterLocation.Header,
+                    Flows = new OpenApiOAuthFlows()
+                    {
+                        Implicit = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(instance + "/" + tenantId + "/oauth2/authorize")
+                        }
+                    }
+                });
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "AAD"
+                            },
+                            Scheme = "AAD",
+                            Name = "AAD",
+                            In = ParameterLocation.Header
+                        },
+                        new List < string > ()
+                    }
+                });
             });
 
-      //      builder.Services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
-      //.AddAzureADBearer(options =>
-      //{
-      //    options.Instance = "";
-      //    options.TenantId = "";
-      //    options.ClientId = "";
-      //    options.Domain = "";
-      //});
-           
+            #region AAD认证设置
+            builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+            .AddMicrosoftIdentityWebApp(options =>
+            {
+                options.Instance = instance;
+                options.Domain = domain;
+                options.TenantId = tenantId;
+                options.ClientId = azureAdClientId;
+            });
+
+            //builder.Services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
+            //    .AddAzureADBearer(options =>
+            //    {
+            //        options.Instance = instance;
+            //        options.TenantId = tenantId;
+            //        options.ClientId = azureAdClientId;
+            //        options.Domain = domain;
+            //    });
+            #endregion
 
             var app = builder.Build();
 
@@ -55,7 +110,13 @@ namespace ECOLAB.IOT.SiteManagement
             {
                 app.UseSwagger();
 
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(swaggerUI =>
+                {
+                    swaggerUI.OAuthClientId(swaggerClientId);
+                    swaggerUI.OAuthRealm(azureAdClientId);
+                    swaggerUI.OAuthScopeSeparator(" ");
+                    swaggerUI.OAuthAdditionalQueryStringParams(new Dictionary<string, string>() { { "resource", azureAdClientId } });
+                });
             }
 
             var quartz = app.Services.GetRequiredService<QuartzHostedService>();
@@ -69,8 +130,8 @@ namespace ECOLAB.IOT.SiteManagement
                 quartz.StopAsync(cancellationToken).Wait();  //app停止完成执行
             });
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
             app.MapControllers();
 
             app.Run();

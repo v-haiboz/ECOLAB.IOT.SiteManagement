@@ -1,6 +1,7 @@
 ﻿using ECOLAB.IOT.SiteManagement.Data.Dto;
 using ECOLAB.IOT.SiteManagement.Filters;
 using ECOLAB.IOT.SiteManagement.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
@@ -9,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ECOLAB.IOT.SiteManagement.Controllers
 {
+    [Authorize]
     [Route("api/sites")]
     [ApiController]
     public class SiteController : ControllerBase
