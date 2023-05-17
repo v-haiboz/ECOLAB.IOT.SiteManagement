@@ -69,12 +69,12 @@
                 return await Task.FromResult(siteResponseDto);
             }
 
-            return null;
+            throw new Exception("Failed to create site.");
         }
 
         public async Task<SiteResponseDto> Update(string siteNo, SiteRequestDto siteRequestDto)
         {
-            var siteEntity = await CovertToSite(siteRequestDto);
+            var siteEntity = await CovertToSite(siteRequestDto, siteNo);
             var bl = _siteRepository.Update(siteNo,siteEntity);
 
             if (bl && siteEntity.SiteRegistries != null)
@@ -96,7 +96,7 @@
                 return await Task.FromResult(siteResponseDto);
             }
 
-            return null;
+            throw new Exception("Failed to update site.");
         }
 
 

@@ -197,6 +197,24 @@
 
         public bool Insert(Site site)
         {
+            var exist = Execute((conn) =>
+            {
+                string query = $@"SELECT Id
+                                  FROM [dbo].[Site]
+                                  where SiteNo='{site.SiteNo}'";
+                var rows = conn.Query(query);
+                if (rows == null || rows.Count() <= 0)
+                {
+                    return false;
+                }
+                return true;
+            });
+
+            if (exist)
+            {
+                throw new BizException($"SiteId:{site.SiteNo} already exists.");
+            }
+
             return Execute((conn, transaction) =>
             {
                 try
@@ -211,7 +229,7 @@
                         foreach (var registry in site.SiteRegistries)
                         {
                             var siteRegistrySb = new StringBuilder();
-                            siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.CreatedAt}');");
+                            siteRegistrySb.Append(@$"insert into SiteRegistry(SiteId,Model,SourceUrl,TargetUrl,Checksum,JObject,Version,CreatedAt) values('{siteId}','{registry.Model}','{registry.SourceUrl}','{registry.TargetUrl}','{registry.Checksum}','{registry.JObject}','{registry.Version}','{registry.CreatedAt}');");
                             siteRegistrySb.Append(" SELECT CAST(SCOPE_IDENTITY() as int) ");
 
                             var siteRegistryId = conn.ExecuteScalar(siteRegistrySb.ToString(), registry, transaction: transaction);
