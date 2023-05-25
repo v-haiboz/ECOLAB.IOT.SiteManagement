@@ -32,35 +32,70 @@
         public NodeFileInfo? GetDeviceStatus(string siteNo, string deviceNo)
         {
 
-            var exist = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
+            var row = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
             {
-                string query = $@"SELECT DeviceNo FROM [dbo].[SiteDevice] as a inner join [dbo].[Site] as b
-                                  on a.SiteId=b.Id
-                                  where b.SiteNo='{siteNo}' and a.DeviceNo='{deviceNo}'";
-                var rows = conn.Query(query);
-                if (rows == null || rows.Count() <= 0)
-                {
-                    return false;
-                }
-                return true;
+                //string query = $@"SELECT DeviceNo FROM [dbo].[SiteDevice] as a inner join [dbo].[Site] as b
+                //                  on a.SiteId=b.Id
+                //                  where b.SiteNo='{siteNo}' and a.DeviceNo='{deviceNo}'";
+
+                string query = $@"SELECT Model ,c.DeviceNo,case when g.DeviceNo is null then 0 else 1 end as IsConfig
+							  FROM [dbo].[SiteDevice] c
+							  inner join [dbo].[Site] as b
+							  on b.Id=c.SiteId
+                              Inner join  [dbo].[SiteRegistry] as d
+                              on d.SiteId=c.SiteId and d.Id=c.SiteRegistryId
+                              left join [dbo].[GatewayDevice] as g
+							  on d.SiteId=g.SiteId and c.DeviceNo=g.DeviceNo
+                              where b.SiteNo='{siteNo}' and c.DeviceNo='{deviceNo}'
+                              order by Model";
+                var row = conn.Query<SiteDeviceMode>(query).FirstOrDefault();
+                return row;
             });
 
-            if (!exist)
+            if (row == null)
             {
-                throw new Exception($"siteNo:{siteNo} or deviceNo:{deviceNo} doesn't exist.");
+                throw new Exception($"siteId:{siteNo} or deviceId:{deviceNo} doesn't exist.");
             }
 
-            string query = $@"SELECT top 1 a.[DeviceSN],a.[CreatedOnUtc] as Last_seen,'' as Mode,[FileURL],case when a.DeviceSN is null then 'offline' else 'online'end as Status
+            var sqltable = GenarateSql(new List<SiteDeviceMode>() { row });
+
+            if (row != null && row?.Model == "vcc")
+            {
+                string query = $@"select m.DeviceId as DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'unassigned' else case when n.DeviceId is null then 'offline' else 'online' end end as Status 
+							  from  ({sqltable}) as m
+                              left join
+							  (SELECT top 1 a.[DeviceSN] as DeviceId,a.[CreatedOnUtc] as Last_seen,'' as Mode,[FileURL],'online' as Status
                               FROM [dbo].[nodeInfo] as a Left join [dbo].[fileInfo] as b
                               on a.DeviceId=b.DeviceId
                               where a.DeviceSN='{deviceNo}' and a.[CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())  
-                              order by a.[CreatedOnUtc]";  //PVM-ECOLAB19
+                              order by a.[CreatedOnUtc] desc,b.[CreatedOnUtc] desc) as n
+							  on m.DeviceId =n.DeviceId";  //PVM-ECOLAB19
 
-            return Execute((conn) =>
+                return Execute((conn) =>
+                {
+                    var list = conn.Query<NodeFileInfo>(query).ToList();
+                    return list.FirstOrDefault();
+                });
+            }
+            else if(row != null && row?.Model == "vrc")
             {
-                var list = conn.Query<NodeFileInfo>(query).ToList();
-                return list.FirstOrDefault();
-            });
+                string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
+                            left join 
+                            ( SELECT  top 1  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,'' as Mode,Image_url as FileURL, 'online' as Status
+                              FROM [dbo].[BaitStation] as a Left join [dbo].[FliesImage] as b
+                              on a.DeviceId=b.DeviceId
+                              where a.DeviceId ='{deviceNo}' and a.[CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())
+							  order by a.[CreatedOnUtc]) as n
+							  on m.DeviceId=n.DeviceId";  //PVM-ECOLAB19
+
+                return Execute(_config["ConnectionStrings:SqlConnectionStringHealthPEC"], (conn) =>
+                {
+                    var list = conn.Query<NodeFileInfo>(query).ToList();
+                    return list.FirstOrDefault();
+                });
+            }
+
+            throw new Exception($"siteNo:{siteNo} or deviceNo:{deviceNo},this model of query is currently not supported:{row?.Model}.");
         }
 
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo)
@@ -213,14 +248,15 @@
             var devices = string.Join("','", siteDeviceModes.Select(n => n.DeviceNo));
 
             var temp = string.Join("','", devices);
-            string query = $@"select m.DeviceId as DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online' end end as Status from  ({sqltable}) as m
+   
+
+            string query = $@"select m.DeviceId as DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'unassigned' else case when n.DeviceId is null then 'offline' else 'online' end end as Status from  ({sqltable}) as m
                             left join 
-                            (select * from (SELECT  a.[DeviceSN] as DeviceId,a.[CreatedOnUtc] as Last_seen,[FileURL], ROW_NUMBER() over (partition by a.[DeviceSN] order by a.[CreatedOnUtc]) as rowNum
-                              FROM [dbo].[nodeInfo] as a Left join [dbo].[fileInfo] as b
-                              on a.DeviceId=b.DeviceId
-                              where a.DeviceSN in('{devices}') and a.[CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())) temp
-							  where temp.rowNum=1) as n
+                            (select * from (select  [DeviceSN] as DeviceId,[CreatedOnUtc] as Last_seen,null as FileURL, ROW_NUMBER() over (partition by [DeviceSN] order by [CreatedOnUtc] desc) as rowNum
+							  from [dbo].[nodeInfo] where DeviceSN in('{devices}') 
+							  and [CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())) as temp where rowNum=1) as n
 							  on m.DeviceId=n.DeviceId";  //PVM-ECOLAB19
+
 
             return Execute((conn) =>
             {
@@ -240,13 +276,12 @@
             var devices = string.Join("','", siteDeviceModes.Select(n => n.DeviceNo));
 
             var temp = string.Join("','", devices);
-            string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
+    
+            string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'unassigned' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
                             left join 
-                            (select * from (SELECT  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,Image_url as FileURL, ROW_NUMBER() over (partition by a.[DeviceId] order by a.[CreatedOnUtc]) as rowNum
-                              FROM [dbo].[BaitStation] as a Left join [dbo].[FliesImage] as b
-                              on a.DeviceId=b.DeviceId
-                              where a.DeviceId in('{devices}') and a.[CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())) temp
-							  where temp.rowNum=1) as n
+                            (select * from (select  [DeviceId],[CreatedOnUtc] as Last_seen,null as FileURL, ROW_NUMBER() over (partition by DeviceId order by [CreatedOnUtc] desc) as rowNum
+                              FROM [dbo].[BaitStation] 
+                              where DeviceId in('{devices}') and [CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())) as temp where rowNum=1) as n
 							  on m.DeviceId=n.DeviceId";  //PVM-ECOLAB19
 
             return Execute(_config["ConnectionStrings:SqlConnectionStringHealthPEC"], (conn) =>

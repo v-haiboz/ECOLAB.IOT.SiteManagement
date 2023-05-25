@@ -38,18 +38,13 @@
 
             if (device != null)
             {
-                deviceHealth.Connection_state = "online";
-                deviceHealth.Last_seen = device.Last_seen;
+                deviceHealth.Connection_state =device.Status;
+                deviceHealth.Last_seen = device?.Last_seen;
                 deviceHealth.Last_event = new LastEvent()
                 {
-                    Image = device.FileURL,
-                    Captured_at = device.Captured_at
+                    Image = device?.FileURL,
+                    Captured_at = device?.Captured_at
                 };
-            }
-            else {
-                deviceHealth.Connection_state = "offline";
-                deviceHealth.Last_seen = null;
-                deviceHealth.Last_event = null;
             }
 
             return await Task.FromResult(deviceHealth);
@@ -75,15 +70,13 @@
                 List<dynamic> list = new List<dynamic>();
                 foreach (var item in data)
                 {
-                    if (item.Status == "online")
+                    list.Add(new
                     {
-                        list.Add(new
-                        {
-                            id = item.DeviceId,
-                            connection_state = item.Status,
-                            last_seen = item.Last_seen
-                        });
-                    }
+                        id = item.DeviceId,
+                        connection_state = item.Status,
+                        last_seen = item.Last_seen
+                    });
+
                 }
                 var total = data.Count;
                 var onlineCount = data.Where(item => item.Status == "online")?.Count();
