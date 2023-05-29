@@ -5,6 +5,7 @@ namespace ECOLAB.IOT.SiteManagement.Provider
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using Flurl.Http;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Logging;
 
     public interface IDistributeJobProvider
     {
@@ -16,11 +17,13 @@ namespace ECOLAB.IOT.SiteManagement.Provider
             private readonly IStorageProvider _storageProvider;
             IConfiguration _config;
             private string _distributeUrl;
-            public DistributeJobProvider(IStorageProvider storageProvider, IConfiguration config)
+            private readonly ILogger<DistributeJobProvider> _logger;
+            public DistributeJobProvider(IStorageProvider storageProvider, IConfiguration config, ILogger<DistributeJobProvider> logger)
             {
                 _storageProvider = storageProvider;
                 _config = config;
                 _distributeUrl = _config["Distribute:Url"];
+                _logger = logger;
             }
 
             public async Task<KeyValuePair<bool, string>> DistributeTask(GatewayAllowListTask gatewayAllowListTask, string groupName, string token)
@@ -45,13 +48,16 @@ namespace ECOLAB.IOT.SiteManagement.Provider
 
                     if (result.status == 200 || result.status == 409)
                     {
+                        _logger.LogInformation($"Task successfully distributed=>_distributeUrl:{_distributeUrl},sasUrl:{sasUrl}");
                         return KeyValuePair.Create(true, sasUrl);
                     }
 
-                    return KeyValuePair.Create(false, sasUrl);
+                    _logger.LogWarning($"Task distribution failed=>_distributeUrl:{_distributeUrl},sasUrl:{sasUrl}");
+                    return KeyValuePair.Create(false,"");
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogWarning($"Task distribution failed=>{ex.Message}");
                     return KeyValuePair.Create(false, "");
                 }
             }

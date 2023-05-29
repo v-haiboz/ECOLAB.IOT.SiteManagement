@@ -78,9 +78,10 @@ namespace ECOLAB.IOT.SiteManagement.Filters
                             }
                         }
                     }
-                    catch {
+                    catch
+                    {
                     }
-                   
+
                 }
                 else
                 {

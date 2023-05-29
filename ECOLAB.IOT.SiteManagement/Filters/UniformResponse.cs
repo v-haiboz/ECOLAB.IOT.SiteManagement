@@ -13,7 +13,7 @@ namespace ECOLAB.IOT.SiteManagement.Filters
     public class UniformResponse<T>
     {
         /// <summary>
-        /// 自定义响应码
+        /// status
         /// </summary>
         [JsonPropertyName("status")]
         public int? Status
@@ -24,54 +24,54 @@ namespace ECOLAB.IOT.SiteManagement.Filters
             }
         }
         /// <summary>
-        /// 请求结果
+        /// data of result
         /// </summary>
         [JsonPropertyName("data")]
         public T? Data { get; set; }
         /// <summary>
         /// 错误信息
         /// </summary>
-       [JsonPropertyName("errors")]
+        [JsonPropertyName("errors")]
         public List<string> Errors { get; set; } = new List<string>();
         /// <summary>
-        /// 响应的时间
+        /// response timestamp.
         /// </summary>
         [JsonPropertyName("timestamp")]
         public long Timestamp { get; set; } = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
         /// <summary>
-        /// 成功
+        /// sucessful.
         /// </summary>
-        /// <param name="data">响应数据</param>
+        /// <param name="data"></param>
         /// <returns></returns>
         public void Succeed(T? data)
         {
-            Data=data;
+            Data = data;
         }
 
         /// <summary>
-        /// 失败
+        /// filed.
         /// </summary>
         /// <param name="errors">错误信息</param>
         /// <param name="statusCode">自定义的错误响应码</param>
         /// <returns></returns>
-        public  void Failure(string errors)
-            {
-              Errors.Add(errors);
-            }
+        public void Failure(string errors)
+        {
+            Errors.Add(errors);
+        }
 
         /// <summary>
-        /// 
+        /// To Conver JObj.
         /// </summary>
         /// <returns></returns>
         public JObject ToConvertJObj()
         {
-            var jobj = JObject.FromObject(this,new Newtonsoft.Json.JsonSerializer() {  Formatting=Newtonsoft.Json.Formatting.Indented, ContractResolver = new CamelCasePropertyNamesContractResolver() });
+            var jobj = JObject.FromObject(this, new Newtonsoft.Json.JsonSerializer() { Formatting = Newtonsoft.Json.Formatting.Indented, ContractResolver = new CamelCasePropertyNamesContractResolver() });
             return jobj;
         }
 
         /// <summary>
-        /// 
+        /// To Json Result.
         /// </summary>
         /// <returns></returns>
         public JsonResult ToJsonResult()

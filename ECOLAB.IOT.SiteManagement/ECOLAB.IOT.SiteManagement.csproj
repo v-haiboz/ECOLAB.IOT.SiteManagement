@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.AzureAD.UI" Version="6.0.16" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="7.0.5" />
     <PackageReference Include="Quartz" Version="3.6.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>

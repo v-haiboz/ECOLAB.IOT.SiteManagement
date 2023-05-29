@@ -1,11 +1,10 @@
-using ECOLAB.IOT.SiteManagement.Filters;
-using ECOLAB.IOT.SiteManagement.Quartz;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using Microsoft.AspNetCore.Mvc;
-
 namespace ECOLAB.IOT.SiteManagement
 {
+    using ECOLAB.IOT.SiteManagement.Filters;
+    using ECOLAB.IOT.SiteManagement.Middlewares;
+    using ECOLAB.IOT.SiteManagement.Quartz;
+    using Microsoft.AspNetCore.Hosting;
+
     public class Program
     {
         public static void Main(string[] args)
@@ -14,7 +13,15 @@ namespace ECOLAB.IOT.SiteManagement
             builder.WebHost.ConfigureKestrel(serverOptions =>
             {
                 serverOptions.Limits.KeepAliveTimeout = TimeSpan.FromSeconds(2);
+                serverOptions.AllowSynchronousIO = true;
             });
+            
+            
+
+
+            // Azure log
+            builder.Host.ConfigureLogging(logging => logging.AddAzureWebAppDiagnostics());
+
             // Add services to the container.
             builder.Services.AddServices()
                 .AddSwaggerGen(c => {
@@ -38,16 +45,16 @@ namespace ECOLAB.IOT.SiteManagement
                 //c.OperationFilter<SwaggerParametersAttributeHandler>();
             });
 
-      //      builder.Services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
-      //.AddAzureADBearer(options =>
-      //{
-      //    options.Instance = "";
-      //    options.TenantId = "";
-      //    options.ClientId = "";
-      //    options.Domain = "";
-      //});
-           
+            //      builder.Services.AddAuthentication(AzureADDefaults.JwtBearerAuthenticationScheme)
+            //.AddAzureADBearer(options =>
+            //{
+            //    options.Instance = "";
+            //    options.TenantId = "";
+            //    options.ClientId = "";
+            //    options.Domain = "";
+            //});
 
+            builder.Services.Configure<IISServerOptions>(x => x.AllowSynchronousIO = true);
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -68,6 +75,8 @@ namespace ECOLAB.IOT.SiteManagement
             {
                 quartz.StopAsync(cancellationToken).Wait();  //appÕ£÷πÕÍ≥…÷¥––
             });
+
+            app.UseExceptionMiddleware();
 
             app.UseAuthorization();
 
