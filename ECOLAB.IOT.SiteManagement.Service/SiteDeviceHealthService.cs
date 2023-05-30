@@ -6,7 +6,7 @@
     using Newtonsoft.Json.Linq;
     public interface ISiteDeviceHealthService
     {
-        public Task<DeviceHealthDto?> GetDeviceStatus(string siteNo, string deviceNo);
+        public Task<JObject?> GetDeviceStatus(string siteNo, string deviceNo);
         public bool GetDeviceListStatus(string siteNo);
 
         public Task<JObject> GetDeviceStatusListBySiteId(string siteNo);
@@ -26,26 +26,9 @@
             throw new NotImplementedException();
         }
 
-        public async Task<DeviceHealthDto?> GetDeviceStatus(string siteNo, string deviceNo)
+        public async Task<JObject?> GetDeviceStatus(string siteNo, string deviceNo)
         {
-            var device = _siteDeviceHealthRepository.GetDeviceStatus(siteNo, deviceNo);
-
-            var deviceHealth = new DeviceHealthDto()
-            {
-                Id = deviceNo,
-                SiteId = siteNo,
-            };
-
-            if (device != null)
-            {
-                deviceHealth.Connection_state =device.Status;
-                deviceHealth.Last_seen = device?.Last_seen;
-                deviceHealth.Last_event = new LastEvent()
-                {
-                    Image = device?.FileURL,
-                    Captured_at = device?.Captured_at
-                };
-            }
+            var deviceHealth = _siteDeviceHealthRepository.GetDeviceStatus(siteNo, deviceNo);
 
             return await Task.FromResult(deviceHealth);
         }

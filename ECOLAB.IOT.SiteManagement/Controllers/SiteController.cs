@@ -428,10 +428,12 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
                 if (!string.IsNullOrEmpty(siteId) && !string.IsNullOrEmpty(deviceId))
                 {
                     result.Data= await _siteDeviceHealthService.GetDeviceStatus(siteId, deviceId);
+                    return result.ToConvertJObj().ToString();
                 }
                 else
                 {
                     result.Failure("siteId or deviceid can't empty.");
+                    return result.ToJsonResult();
                 }
             }
             catch (Exception ex)

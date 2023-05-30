@@ -1,13 +1,18 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Repository
 {
     using Dapper;
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
+    using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
+    using ECOLAB.IOT.SiteManagement.Data.Entity.ExternalDB;
     using Microsoft.Extensions.Configuration;
+    using Newtonsoft.Json.Linq;
     using System.Text;
+    using static System.Net.Mime.MediaTypeNames;
 
     public interface ISiteDeviceHealthRepository
     {
-        public NodeFileInfo GetDeviceStatus(string siteNo, string deviceNo);
+        public JObject GetDeviceStatus(string siteNo, string deviceNo);
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo);
         public List<SiteDeviceMode>? GetDeviceListFromInternalDb(string siteNo,string gatewayNo);
        
@@ -29,14 +34,11 @@
         }
 
 
-        public NodeFileInfo? GetDeviceStatus(string siteNo, string deviceNo)
+        public JObject? GetDeviceStatus(string siteNo, string deviceNo)
         {
 
             var row = Execute(_config["ConnectionStrings:SqlConnectionString"], (conn) =>
             {
-                //string query = $@"SELECT DeviceNo FROM [dbo].[SiteDevice] as a inner join [dbo].[Site] as b
-                //                  on a.SiteId=b.Id
-                //                  where b.SiteNo='{siteNo}' and a.DeviceNo='{deviceNo}'";
 
                 string query = $@"SELECT Model ,c.DeviceNo,case when g.DeviceNo is null then 0 else 1 end as IsConfig
 							  FROM [dbo].[SiteDevice] c
@@ -58,7 +60,16 @@
             }
 
             var sqltable = GenarateSql(new List<SiteDeviceMode>() { row });
+            //var deviceHealth = new DeviceHealthDto()
+            //{
+            //    Id = deviceNo,
+            //    SiteId = siteNo,
+            //};
 
+            var jobject = new JObject();
+            jobject.Add("id", deviceNo);
+            jobject.Add("site_id", siteNo);
+            
             if (row != null && row?.Model == "vcc")
             {
                 string query = $@"select m.DeviceId as DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'unassigned' else case when n.DeviceId is null then 'offline' else 'online' end end as Status 
@@ -74,15 +85,26 @@
                 return Execute((conn) =>
                 {
                     var list = conn.Query<NodeFileInfo>(query).ToList();
-                    return list.FirstOrDefault();
+                    var device = list.FirstOrDefault();
+                    if (device != null)
+                    {
+                        jobject.Add("connection_state", device?.Status);
+                        jobject.Add("last_seen", device?.Last_seen);
+                        jobject.Add("last_event", JToken.FromObject(new {
+                            image=device?.FileURL,
+                            captured_at = device?.Captured_at
+                        }));
+                    }
+
+                    return jobject;
                 });
             }
             else if(row != null && row?.Model == "vrc")
             {
-                string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.FileURL,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
+                string query = $@"select m.DeviceId,m.Mode,case when m.IsConfig=0 then null else n.Last_seen end as Last_seen,n.Low_alarm,case when m.IsConfig=0 then 'null' else case when n.DeviceId is null then 'offline' else 'online'end end as Status from  ({sqltable}) as m
                             left join 
-                            ( SELECT  top 1  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,'' as Mode,Image_url as FileURL, 'online' as Status
-                              FROM [dbo].[BaitStation] as a Left join [dbo].[FliesImage] as b
+                            ( SELECT  top 1  a.[DeviceId],a.[CreatedOnUtc] as Last_seen,'' as Mode,Low_alarm , 'online' as Status,b.Captured_at
+                              FROM [dbo].[BaitStation] as a Left join [dbo].[BatteryAlarm] as b
                               on a.DeviceId=b.DeviceId
                               where a.DeviceId ='{deviceNo}' and a.[CreatedOnUtc]>DATEADD(DAY,{_onlineDays},GETDATE())
 							  order by a.[CreatedOnUtc]) as n
@@ -90,8 +112,20 @@
 
                 return Execute(_config["ConnectionStrings:SqlConnectionStringHealthPEC"], (conn) =>
                 {
-                    var list = conn.Query<NodeFileInfo>(query).ToList();
-                    return list.FirstOrDefault();
+                    var list = conn.Query<NodeAlarmInfo>(query).ToList();
+                    var device = list.FirstOrDefault();
+                    if (device != null)
+                    {
+                        jobject.Add("connection_state", device?.Status);
+                        jobject.Add("last_seen", device?.Last_seen);
+                        jobject.Add("last_event", JToken.FromObject(new
+                        {
+                            low_alarm = device?.Low_alarm,
+                            captured_at = device?.GetDateTime()
+                        }));
+                    }
+
+                    return jobject;
                 });
             }
 
