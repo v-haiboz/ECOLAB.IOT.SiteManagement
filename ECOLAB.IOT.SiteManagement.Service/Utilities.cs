@@ -37,7 +37,7 @@
             }
         }
 
-        public static SiteDeviceTransformerDto GetSiteDeviceFromMeshJson(string json)
+        public static SiteDeviceTransformerDto GetSiteDeviceFromMeshJson(string json, string mode = "vcc")
         {
             JObject jObject = JObject.Parse(json);
             var siteDeviceMesh = new SiteDeviceTransformerDto();
@@ -55,19 +55,50 @@
 
             foreach (JToken node in nodes)
             {
-                var deviceToken = node["nodeName"];
-                if (deviceToken == null)
+                var nodeName = node["nodeName"];
+                if (nodeName == null)
                 {
                     continue;
                 }
-                var deviceNo = deviceToken.ToString();
+                var deviceNo = nodeName.ToString();
                 if (string.IsNullOrEmpty(deviceNo))
                     continue;
+
+
+                var jOjectInAllowList = new JObject();
+                jOjectInAllowList.Add("SN", nodeName);
+                jOjectInAllowList.Add("mode", mode);
+
+                var properties = new JObject();
+                
+                if (nodeName != null) {
+                    properties.Add("nodeName", nodeName);
+                }
+
+                var deviceType = node["deviceType"];
+                if (deviceType != null)
+                {
+                    properties.Add("deviceType", deviceType);
+                }
+
+                var macAddress = node["macAddress"];
+                if (macAddress != null)
+                {
+                    properties.Add("macAddress", macAddress);
+                }
+
+                var unicastAddress = node["unicastAddress"];
+                if (unicastAddress != null)
+                {
+                    properties.Add("unicastAddress", unicastAddress);
+                }
+
+                jOjectInAllowList.Add("property", properties);
 
                 siteDeviceMesh.DeviceTransformerDtos.Add(new DeviceTransformerDto()
                 {
                     DeviceNo = deviceNo,
-                    JOjectInAllowList = node.ToString(),
+                    JOjectInAllowList = jOjectInAllowList.ToString(),
                     Json = json
                 });
             }
@@ -75,8 +106,8 @@
             return siteDeviceMesh;
         }
 
-        public static SiteDeviceTransformerDto GetSiteDeviceFromLoraJson(string json)
-        {
+        public static SiteDeviceTransformerDto GetSiteDeviceFromLoraJson(string json, string mode = "vrc")
+        { 
             JObject jObject = JObject.Parse(json);
             var siteDevice = new SiteDeviceTransformerDto();
             if (jObject.SelectToken("version") != null)
@@ -91,19 +122,32 @@
 
             foreach (JToken node in nodes)
             {
-                var deviceToken = node["SN"];
-                if (deviceToken == null)
+                var sn = node["SN"];
+                if (sn == null)
                 {
                     continue;
                 }
-                var deviceNo = deviceToken.ToString();
+                var deviceNo = sn.ToString();
                 if (string.IsNullOrEmpty(deviceNo))
                     continue;
+
+                var jOjectInAllowList = new JObject();
+                jOjectInAllowList.Add("SN", sn);
+                jOjectInAllowList.Add("mode", mode);
+
+                var properties = new JObject();
+                var code = node["Code"];
+                if (code != null)
+                {
+                    properties.Add("Code", code);
+                }
+
+                jOjectInAllowList.Add("property", properties);
 
                 siteDevice.DeviceTransformerDtos.Add(new DeviceTransformerDto()
                 {
                     DeviceNo = deviceNo,
-                    JOjectInAllowList = node.ToString(),
+                    JOjectInAllowList = jOjectInAllowList.ToString(),
                     Json = json
                 });
             }
@@ -111,37 +155,18 @@
             return siteDevice;
         }
 
+
         public static string GetAllowListJson(List<SiteDeviceDetailInfoDto> siteDeviceDetailInfoDtos,string siteNo)
         {
             var jobject = new JObject();
          
             jobject.Add("siteId", siteNo);
-            var models = siteDeviceDetailInfoDtos?.Select(item => item.Model)?.ToList()?.Distinct();
-            if (models != null)
-            {
-                foreach (var model in models)
-                {
-                    var deviceAllowList = new JArray();
-                    var vccDevices = siteDeviceDetailInfoDtos?.Where(vcc => vcc.Model == model);
-                    if (vccDevices != null)
-                    {
-                        foreach (var item in vccDevices)
-                        {
-                            deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList));
-                        }
-                    }
-
-                    if (model.ToLowerInvariant() == ModelEnum.VCC.ToString().ToLowerInvariant())
-                    {
-                        jobject.Add("nodes", deviceAllowList);
-                    }
-                    else
-                    {
-                        jobject.Add($"nodes_{model}", deviceAllowList);
-                    }
-                }
+            var deviceAllowList = new JArray();
+            foreach (var item in siteDeviceDetailInfoDtos) {
+                deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList));
             }
-            
+
+            jobject.Add("nodes", deviceAllowList);
             var settings = new JsonSerializerSettings();
             settings.Formatting = Formatting.Indented;
             return JsonConvert.SerializeObject(jobject, settings);

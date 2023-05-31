@@ -167,17 +167,16 @@
             return list;
         }
 
-     
 
         private async Task<SiteDeviceTransformerDto> ConverToSiteDevicesFromJson(string content_json, string mode = "vcc")
         {
             if (mode.ToLower() == ModelEnum.VRC.ToString().ToLower())
             {
-                var siteDeviceLora = Utilities.GetSiteDeviceFromLoraJson(content_json);
+                var siteDeviceLora = Utilities.GetSiteDeviceFromLoraJson(content_json, mode = "vrc");
                 return siteDeviceLora;
             }
 
-            var siteDeviceMesh = Utilities.GetSiteDeviceFromMeshJson(content_json);
+            var siteDeviceMesh = Utilities.GetSiteDeviceFromMeshJson(content_json, mode = "vcc");
             return siteDeviceMesh;
         }
 

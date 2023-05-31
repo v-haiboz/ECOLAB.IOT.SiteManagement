@@ -106,36 +106,6 @@
                 throw new Exception(sb.ToString());
             }
 
-            //var gateway = Execute((conn) =>
-            //{
-            //    string query = $@"select a.* from [dbo].[SiteGateway] as a 
-            //                        where a.GatewayNo='{gatewayNo}' and a.SIteId='{site.Id}'";
-            //    var gateway = conn.Query<SiteGateway>(query);
-            //    return gateway.FirstOrDefault();
-            //});
-
-            //if (gateway == null)
-            //{
-            //    throw new Exception("gatewayNo doesn't exist, pls double check.");
-            //}
-
-            ////var validate = Execute((conn) =>
-            ////{
-            ////    var devicesList = string.Join("','", deviceNos);
-            ////    string query = $@"SELECT Id FROM [dbo].[SiteDevice] where SiteId={site.Id} and DeviceNo in('{devicesList}')";
-            ////    var rows = conn.Query(query);
-            ////    if (rows == null || rows.Count() <= 0 || (rows.Count() != deviceNos.Count))
-            ////    {
-            ////        return false;
-            ////    }
-            ////    return true;
-            ////});
-
-            ////if (!validate)
-            ////{
-            ////    throw new Exception($"Some device numbers do not exist, pls double check.");
-            ////}
-
             return Execute((conn) =>
             {
                 var devicesList = string.Join("','", deviceNos);
