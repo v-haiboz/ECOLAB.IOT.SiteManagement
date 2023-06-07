@@ -1,6 +1,8 @@
 ﻿
 namespace ECOLAB.IOT.SiteManagement.Provider
 {
+    using Azure.Storage.Blobs;
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using Flurl.Http;
@@ -33,13 +35,20 @@ namespace ECOLAB.IOT.SiteManagement.Provider
                     if (string.IsNullOrEmpty(sasUrl))
                         return KeyValuePair.Create(false, "");
 
+                    var connectionString = _config["BlobOfRegistry:ConnectionString"];
+                    Uri uri = new Uri(gatewayAllowListTask.AllowListUrl);
+                    BlobClient blobClient = new BlobClient(uri);
+                    var blobContainerName = blobClient.BlobContainerName;
+                    var blobName = blobClient.Name;
+                    var md5 = await _storageProvider.GetBlobMD5(connectionString, blobContainerName, blobName);
+
                     var result = await url.WithHeader("Authorization", $"Bearer {token}").PostJsonAsync(new
                     {
-                        netWork = "BLEMesh",
+                        filetype = "AllowList.json",
+                        otaHead="no",
+                        checksum= md5,
                         configFileUrl = sasUrl,
-                        appId = "PVM",
-                        fileName = "AllowList.json",
-                        version = "1.0.1"
+                        version = Utility.GenerateAllowListVersion()
                     }).ReceiveJson<DistributeTaskResponseDto>();
 
 

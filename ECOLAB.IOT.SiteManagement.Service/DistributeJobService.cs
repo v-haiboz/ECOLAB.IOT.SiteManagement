@@ -45,7 +45,7 @@
             foreach (var task in gatewayAllowListTasks)
             {
                 var tokenInfoDto = await _tokenProvider.GetToken();
-                var result = await _distributeJobProvider.DistributeTask(task, "localNetwork", tokenInfoDto.Access_Token);
+                var result = await _distributeJobProvider.DistributeTask(task, "cloudConfigFile", tokenInfoDto.Access_Token);
                 if (result.Key)
                 {
                     _gatewayAllowListTaskRepository.InsertHistory(new GatewayAllowListTaskHistory()

@@ -36,6 +36,12 @@
             //}
         }
 
+        public static string GenerateAllowListVersion()
+        {
+            var dateTime = DateTime.UtcNow;
+            return $"V{dateTime.Year.ToString().Substring(2,2)}.{dateTime.Month.ToString().PadLeft(2,'0')}.{dateTime.Day.ToString().PadLeft(2,'0')}.{dateTime.Hour.ToString().PadLeft(2, '0')}{dateTime.Minute.ToString().PadLeft(2, '0')}";
+        }
+
         private const string hex_reg = @"[0-9a-fA-F]";
         private const string stringOrNumber = @"^[a-zA-Z0-9]*$";
         private const string stringOrNumberOrOthers = @"^[a-zA-Z0-9._//-]*$";
