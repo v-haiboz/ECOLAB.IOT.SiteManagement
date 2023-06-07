@@ -84,6 +84,8 @@
                     conn.Execute(delete1, transaction: transaction);
                     string delete2 = $"delete from  [dbo].[GatewayDevice] where SiteId='{tuple.SiteId}'and GatewayId='{tuple.GatewayId}'";
                     conn.Execute(delete2, transaction: transaction);
+                    string delete3 = $"delete from  [dbo].[GatewayAllowListTask] where SiteId='{tuple.SiteId}'and GatewayId='{tuple.GatewayId}'";
+                    conn.Execute(delete3, transaction: transaction);
                     transaction.Commit();
                     return true;
                 }

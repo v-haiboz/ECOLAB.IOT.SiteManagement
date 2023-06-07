@@ -162,8 +162,12 @@
          
             jobject.Add("siteId", siteNo);
             var deviceAllowList = new JArray();
-            foreach (var item in siteDeviceDetailInfoDtos) {
-                deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList));
+            if (siteDeviceDetailInfoDtos != null)
+            {
+                foreach (var item in siteDeviceDetailInfoDtos)
+                {
+                    deviceAllowList.Add(JToken.Parse(item.JObjectInAllowList));
+                }
             }
 
             jobject.Add("nodes", deviceAllowList);

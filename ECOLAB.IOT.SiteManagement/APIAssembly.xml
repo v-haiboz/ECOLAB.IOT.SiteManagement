@@ -191,6 +191,82 @@
             <param name="next"></param>
             <returns></returns>
         </member>
+        <member name="T:ECOLAB.IOT.SiteManagement.Middlewares.MiddlewareExtension">
+            <summary>
+            MiddlewareExtension
+            </summary>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Middlewares.MiddlewareExtension.UseExceptionMiddleware(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            Use Exception Middleware
+            </summary>
+            <param name="app">app</param>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.ExceptionMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Logging.ILogger{ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.ExceptionMiddleware})">
+            <summary>
+            Customer Exception Middleware
+            </summary>
+            <param name="next"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.ExceptionMiddleware.Invoke(Microsoft.AspNetCore.Http.HttpContext)">
+            <summary>
+            Invoke
+            </summary>
+            <param name="context">context</param>
+            <returns></returns>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.Url">
+            <summary>
+            Url
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.TokenInfo">
+            <summary>
+            Token Info
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.APICertificate">
+            <summary>
+            APICertificate
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.Method">
+            <summary>
+            Method
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.QueryString">
+            <summary>
+            Query String
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.RequestBody">
+            <summary>
+            Request Body
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.ResponseBody">
+            <summary>
+            Response Body
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.ExcuteStartTime">
+            <summary>
+            Excute Start Time
+            </summary>
+        </member>
+        <member name="P:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.ExcuteEndTime">
+            <summary>
+            Excute End Time
+            </summary>
+        </member>
+        <member name="M:ECOLAB.IOT.SiteManagement.Middlewares.TraceMiddleware.RequestResponseLog.ToString">
+            <summary>
+            To Log String
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:ECOLAB.IOT.SiteManagement.Properties.Resources">
             <summary>
               一个强类型的资源类，用于查找本地化的字符串等。
