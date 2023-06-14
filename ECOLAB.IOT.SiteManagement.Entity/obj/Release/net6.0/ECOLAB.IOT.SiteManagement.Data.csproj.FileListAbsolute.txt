@@ -1,0 +1,15 @@
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.deps.json
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Common.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\bin\Release\net6.0\ECOLAB.IOT.SiteManagement.Common.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.csproj.AssemblyReference.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.GeneratedMSBuildEditorConfig.editorconfig
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.AssemblyInfoInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.AssemblyInfo.cs
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.csproj.CoreCompileInputs.cache
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.csproj.CopyComplete
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\refint\ECOLAB.IOT.SiteManagement.Data.dll
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ECOLAB.IOT.SiteManagement.Data.pdb
+C:\EcoCode\ECOLAB.IOT.SiteManagement\ECOLAB.IOT.SiteManagement.Entity\obj\Release\net6.0\ref\ECOLAB.IOT.SiteManagement.Data.dll
