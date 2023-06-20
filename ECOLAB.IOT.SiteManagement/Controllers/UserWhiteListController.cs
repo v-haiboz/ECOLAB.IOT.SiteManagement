@@ -1,10 +1,14 @@
 ﻿using ECOLAB.IOT.SiteManagement.Data.Dto;
 using ECOLAB.IOT.SiteManagement.Filters;
 using ECOLAB.IOT.SiteManagement.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace ECOLAB.IOT.SiteManagement.Controllers
 {
+    [Authorize]
+    [WhiteListFilter]
     [Route("api/sites")]
     public class UserWhiteListController : ControllerBase
     {
@@ -18,14 +22,14 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
 
 
         /// <summary>
-        /// 查询UserWhiteList.
+        /// 查询 UserWhiteList.
         /// </summary>
         /// <param name="email"></param>
         /// <param name="pageIndex"></param>
         /// <param name="pageSize"></param>
         /// <returns></returns>
         [Tags("UserWhiteList")]
-        [HttpGet("UserWhiteList")]
+        [HttpGet("userwhitelist")]
         public async Task<dynamic> Get(string? email = null, int pageIndex = 1, int pageSize = 50)
         {
             var result = new UniformPageResponse<dynamic>();
@@ -45,14 +49,15 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         }
 
         /// <summary>
-        /// 
+        /// 删除 UserWhiteList.
         /// </summary>
         /// <param name="siteRequestDto"></param>
         /// <returns></returns>
         [Tags("UserWhiteList")]
-        [HttpDelete("UserWhiteList")]
+        [HttpDelete()]
+        [Route("userwhitelist/{email}")]
 
-        public async Task<dynamic> Delete(string email)
+        public async Task<dynamic> Delete([Required] string email)
         {
             var result = new UniformResponse<dynamic>();
             try
@@ -68,14 +73,14 @@ namespace ECOLAB.IOT.SiteManagement.Controllers
         }
 
         /// <summary>
-        /// 
+        /// 添加 UserWhiteList.
         /// </summary>
         /// <param name="siteRequestDto"></param>
         /// <returns></returns>
         [Tags("UserWhiteList")]
-        [HttpPost("UserWhiteList")]
+        [HttpPost("userwhitelist")]
 
-        public async Task<dynamic> Post(InsertUserWhiteListDto insertUserWhiteListDto)
+        public async Task<dynamic> Post([FromBody]InsertUserWhiteListDto insertUserWhiteListDto)
         {
             var result = new UniformResponse<dynamic>();
             try

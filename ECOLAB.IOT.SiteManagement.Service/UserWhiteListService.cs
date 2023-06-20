@@ -1,5 +1,6 @@
 ﻿namespace ECOLAB.IOT.SiteManagement.Service
 {
+    using ECOLAB.IOT.SiteManagement.Common.Utilities;
     using ECOLAB.IOT.SiteManagement.Data.Dto;
     using ECOLAB.IOT.SiteManagement.Data.Entity;
     using ECOLAB.IOT.SiteManagement.Repository;
@@ -13,20 +14,30 @@
         public Task<UserWhiteList> InsertUserWhiteList(InsertUserWhiteListDto insertUserWhiteListDto);
 
         public Task<bool> DeleteUserWhiteList(string email);
+
+        public Task<UserWhiteList> GetUserWhiteListByEmail(string email);
     }
 
     public class UserWhiteListService : IUserWhiteListService
     {
         private readonly IUserWhiteListRepository _userWhiteListRepository;
+        private readonly IMemoryCacheService _memoryCacheService;
+        public const string UserWhiteListKeyPrefix = "userwhitelist_";
 
-        public UserWhiteListService(IUserWhiteListRepository userWhiteListRepository)
+        public UserWhiteListService(IUserWhiteListRepository userWhiteListRepository, IMemoryCacheService memoryCacheService)
         {
             _userWhiteListRepository=userWhiteListRepository;
+            _memoryCacheService = memoryCacheService;
         }
 
         public Task<bool> DeleteUserWhiteList(string email=null)
         {
             var bl= _userWhiteListRepository.DeleteUserWhiteList(email);
+            if (bl)
+            {
+                _memoryCacheService.RemoveValue(email.AddPrefix(UserWhiteListKeyPrefix));
+            }
+
             return Task.FromResult<bool>(bl);
         }
 
@@ -51,6 +62,12 @@
         public Task<UserWhiteList> InsertUserWhiteList(InsertUserWhiteListDto insertUserWhiteListDto)
         {
             var list= _userWhiteListRepository.InsertUserWhiteList(new UserWhiteList() {  Email= insertUserWhiteListDto.Email});
+            return Task.FromResult(list);
+        }
+
+        public Task<UserWhiteList> GetUserWhiteListByEmail(string email)
+        {
+            var list = _userWhiteListRepository.GetUserWhiteListByEmail(email);
             return Task.FromResult(list);
         }
     }

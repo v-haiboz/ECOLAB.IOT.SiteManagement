@@ -1,4 +1,5 @@
-﻿using ECOLAB.IOT.SiteManagement.Provider;
+﻿using AspNetCoreRateLimit;
+using ECOLAB.IOT.SiteManagement.Provider;
 using ECOLAB.IOT.SiteManagement.Quartz;
 using ECOLAB.IOT.SiteManagement.Repository;
 using ECOLAB.IOT.SiteManagement.Service;
@@ -12,6 +13,15 @@ namespace ECOLAB.IOT.SiteManagement
 
     public static class ServiceCollection
     {
+        public static IServiceCollection AddInMemoryRateLimiting(this IServiceCollection services)
+        {
+            services.AddSingleton<IIpPolicyStore, MemoryCacheIpPolicyStore>();
+            services.AddSingleton<IClientPolicyStore, MemoryCacheClientPolicyStore>();
+            services.AddSingleton<IRateLimitCounterStore, MemoryCacheRateLimitCounterStore>();
+            services.AddSingleton<IProcessingStrategy, AsyncKeyLockProcessingStrategy>();
+            return services;
+        }
+
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
             if (services == null)
@@ -22,7 +32,9 @@ namespace ECOLAB.IOT.SiteManagement
             services.AddScoped<IGatewayDeviceService, GatewayDeviceService>();
             services.AddScoped<ISiteDeviceHealthService, SiteDeviceHealthService>();
             services.AddScoped<IDistributeJobService, DistributeJobService>();
-            services.AddScoped<IUserWhiteListService, UserWhiteListService>();
+            services.AddScoped<IUserWhiteListService, UserWhiteListService>(); 
+            services.AddScoped<ICertificationService, CertificationService>();
+            services.AddScoped<IMemoryCacheService, MemoryCacheService>();
             return services;
         }
 
@@ -38,6 +50,7 @@ namespace ECOLAB.IOT.SiteManagement
             services.AddScoped<IGatewayAllowListTaskRepository, GatewayAllowListTaskRepository>();
             services.AddScoped<ISiteRegistryRepository, SiteRegistryRepository>();
             services.AddScoped<IUserWhiteListRepository, UserWhiteListRepository>();
+            services.AddScoped<ICertificationRepository, CertificationRepository>();
             return services;
         }
 

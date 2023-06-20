@@ -14,10 +14,13 @@
         public UserWhiteList InsertUserWhiteList(UserWhiteList userWhiteList);
 
         public bool DeleteUserWhiteList(string email);
+
+        public UserWhiteList? GetUserWhiteListByEmail(string email);
     }
 
     public class UserWhiteListRepository : Repository, IUserWhiteListRepository
     {
+        public const string UserWhiteListKeyPrefix = "userwhitelist_";
         public UserWhiteListRepository(IConfiguration config) : base(config)
         {
         }
@@ -54,7 +57,7 @@
 
             var wheresql= $@"where 1=1";
             if(!string.IsNullOrEmpty(email))
-                wheresql = $@"where a.Email='{email}'";
+                wheresql = $@"where Email='{email}'";
 
             sb.AppendFormat("SELECT COUNT(1) FROM [dbo].[UserWhiteList] {0};", wheresql);
             sb.AppendFormat(@"SELECT * FROM [dbo].[UserWhiteList] {0} ORDER BY [CreatedAt] OFFSET {1} ROWS FETCH NEXT {2} ROWS ONLY",
@@ -75,6 +78,27 @@
                     throw new Exception("Query failed.");
                 }
             }
+        }
+
+        public UserWhiteList? GetUserWhiteListByEmail(string email)
+        { 
+            return Execute((conn) =>
+            {
+                try
+                {
+                    var sql = @$"SELECT * FROM [dbo].[UserWhiteList] where Email='{email}'";
+                    var items=conn.Query<UserWhiteList>(sql);
+                    return items.FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("query UserWhiteList by email failed.");
+                }
+                finally
+                {
+                    conn.Close();
+                }
+            });
         }
 
         public UserWhiteList InsertUserWhiteList(UserWhiteList userWhiteList)
